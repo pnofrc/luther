@@ -25,10 +25,6 @@ class PlaceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('keyword_id')
-                ->label('Place')
-                ->options(Keyword::all()->pluck('title_it', 'id'))
-                ->required(),
                     Forms\Components\TextInput::make('title_it')->label('Title (IT)'),
                     Forms\Components\TextInput::make('title_de')->label('Title (DE)'),
                     Forms\Components\TextInput::make('title_en')->label('Title (EN)'),

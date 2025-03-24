@@ -6,5 +6,6 @@ use App\Models\Keyword;
 
 Route::get('/', function (Place $places, Keyword $keywords) {
     $places = Place::with('keyword')->get();
-    return view('welcome', compact('places'));
+    $keywords = Keyword::get();
+    return view('welcome', compact('places', 'keywords'));
 });

@@ -9,7 +9,6 @@
     {{-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> --}}
 
-
     <style>
         @font-face {
             font-family: "orpheus";
@@ -90,7 +89,7 @@
 
         .right {
             display: flex;
-            width: 25%;
+            width: 35%;
             justify-content: space-around;
         }
 
@@ -103,7 +102,7 @@
             cursor: pointer;
         }
 
-        #listPlaces {
+        #listPlaces, #listKeywords {
             display: none;
             position: absolute;
             flex-direction: column;
@@ -113,7 +112,7 @@
         }
 
 
-        .places {
+        .places,.keywords {
             display: flex;
             width: 100%;
             border-left: solid 1px;
@@ -121,17 +120,17 @@
         }
 
         /* Stile per ogni voce del menu dei luoghi */
-        .placeItem {
+        .placeItem, .keywordItem {
             padding: 0.2vw;
             display: inline;
             cursor: pointer;
         }
 
-        .placeItem:hover {
+        .placeItem:hover,.keywordItem:hover {
             border-bottom: 1px solid #333;
         }
 
-        /* Stile per il marker testuale */
+    
         .my-div-icon {
             background: rgba(255, 255, 255, 0.8);
             border: 1px solid #333;
@@ -165,9 +164,9 @@
             border: 1px solid #000;
             max-width: 300px;
             font-size: 1.2vw;
-  line-height: 1.4vw;
-          z-index: 9999;
-          pointer-events: all
+            line-height: 1.4vw;
+            z-index: 9999;
+            pointer-events: all
         }
 
         .closeBtn {
@@ -181,30 +180,30 @@
         .marker-label {
             font-size: 1.5vw;
             font-family: "Fraktur";
-          
+
         }
 
 
-        .title-box{
-          margin-top: 1rem;
-        display: block; 
-        }
-        .keywords{
-          margin: 1rem 0;
-          display: flex;
-          flex-direction: column;
+        .title-box {
+            margin-top: 1rem;
+            display: block;
         }
 
-        .keywords p{
-          margin: 0;
+        .keywords {
+            margin: 1rem 0;
+            display: flex;
+            flex-direction: column;
         }
 
-        .title-box, .keywords span{
-          font-family: "Fraktur";
-          font-size: 1.4vw;
+        .keywords p {
+            margin: 0;
         }
 
-       
+        .title-box,
+        .keywords span {
+            font-family: "Fraktur";
+            font-size: 1.4vw;
+        }
     </style>
 </head>
 
@@ -220,10 +219,20 @@
                 <span id="titlePlaceText">Luoghi</span>
                 <div id="listPlaces">
                     @foreach ($places as $place)
-                        <span class="placeItem" data-id="{{ $place->id }}" data-lat="{{ $place->latitude }}"
-                            data-lng="{{ $place->longitude }}">
-                            {{ $place->title_it }}
-                        </span>
+                    <span class="placeItem" data-id="{{ $place->id }}" data-lat="{{ $place->latitude }}"
+                        data-lng="{{ $place->longitude }}">
+                        {{ $place->title_it }}
+                    </span>
+                    @endforeach
+                </div>
+            </div>
+            <div class="padding pointer places" id="titleKeyword">
+                <span id="titleKeywordText">Parole Chiave</span>
+                <div id="listKeywords">
+                    @foreach ($keywords as $keyword)
+                    <span class="keywordItem" data-id="{{ $keyword->id }}">
+                        {{ $keyword->title_it }}
+                    </span>
                     @endforeach
                 </div>
             </div>
@@ -243,18 +252,15 @@
 
     <div id="map"></div>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzFoo_5mTjJGFO7RO8FzPZXKBher0uH0k&callback=initMap" async
-        defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzFoo_5mTjJGFO7RO8FzPZXKBher0uH0k&callback=initMap"
+        async defer></script>
     <script src="https://unpkg.com/@googlemaps/markerwithlabel/dist/index.min.js"></script>
     <script>
         var isMobile = false; // Inizialmente, assumiamo che non siamo su un dispositivo mobile
-
-
         if (window.innerWidth <= 960) {
             isMobile = true;
         }
         var centerCoordinates;
-
         if (isMobile) {
             centerCoordinates = {
                 lat: 47.47007,
@@ -266,29 +272,24 @@
                 lng: 9.852218
             };
         }
-
-
         let map;
         let markers = {};
         let currentLang = "IT";
         let connectionLine = null; // Per la linea tratteggiata
-        let places = {!! json_encode($places->toArray()) !!}; // Dati dai backend
-
-        console.log(places)
+        let places = {!!json_encode($places -> toArray())!!}; // Dati dai backend
+        let keywords = {!!json_encode($keywords -> toArray())!!}; // Dati dai backend
         // Imposta manualmente le coordinate di Wittenberg
         const wittenberg = {
             lat: 51.90123, // Imposta la latitudine corretta
             lng: 12.60321 // Imposta la longitudine corretta
         };
         let connectionLines = [];
-
         let lineMapping = {};
 
         function initMap() {
             // Inizializzazione della mappa
             map = new google.maps.Map(document.getElementById("map"), {
                 center: centerCoordinates, // Assicurati che 'centerCoordinates' sia definito
-                
                 zoom: 4,
                 minZoom: 4,
                 mapTypeControl: false,
@@ -406,16 +407,14 @@
                     }
                 ]
             });
-
-            document.getElementById("coord").innerHTML = wittenberg.lat.toFixed(5)+", "+wittenberg.lng.toFixed(5)
+            document.getElementById("coord").innerHTML = wittenberg.lat.toFixed(5) + ", " + wittenberg.lng.toFixed(5)
             google.maps.event.addListener(map, 'center_changed', function() {
-              let center = map.getCenter();
-              document.getElementById("coord").innerHTML = center.lat().toFixed(5)+", "+center.lng().toFixed(5)
+                let center = map.getCenter();
+                document.getElementById("coord").innerHTML = center.lat().toFixed(5) + ", " + center.lng()
+                    .toFixed(5)
             });
-            
             // Renderizzazione delle info box
             renderInfoBoxes();
-
             // Icona personalizzata per il marker (per esempio, un punto nero)
             var customIconDot = {
                 url: 'https://lutherlexiconmap.education/wp-content/themes/lutherlexiconmap/images/icon-dot-black.svg', // URL dell'immagine
@@ -423,13 +422,10 @@
                 origin: new google.maps.Point(0, 0), // Punto di origine
                 anchor: new google.maps.Point(10, 10) // Punto di ancoraggio
             };
-
             // Variabili per i marker e per la mappa
             let bounds = new google.maps.LatLngBounds(); // Per calcolare la bounding box
-
             places.forEach((place) => {
                 let marker;
-
                 // Creazione del marker, personalizzato per Wittenberg
                 if (place.title_it === "Wittenberg" || place.title_de === "Wittenberg" || place.title_en ===
                     "Wittenberg") {
@@ -462,13 +458,10 @@
                         },
                     });
                 }
-
                 // Aggiungi i marker alla bounding box per il calcolo del livello di zoom
                 bounds.extend(marker.getPosition());
-
                 // Memorizza il marker
                 markers[place.id] = marker;
-
                 // Aggiungi l'evento di clic per il marker
                 marker.addListener("click", () => {
                     if (getLabel(place) !== "Wittenberg") {
@@ -480,24 +473,22 @@
                     } else {
                         if (lineMapping[place.id]) {
                             lineMapping[place.id].forEach(line => line.setMap(
-                            null)); // Rimuovi le linee esistenti
+                                null)); // Rimuovi le linee esistenti
                             delete lineMapping[place.id]; // Elimina la mappatura delle linee
                         }
                     }
                     showInfoBox(place.id); // Mostra la info box
                 });
             });
-
             // map.fitBounds(bounds);
-
             // Funzione per mostrare o nascondere i marker in base al livello di zoom
             function toggleMarkersByZoom(zoomLevel) {
                 places.forEach((place) => {
                     let marker = markers[place.id];
-
                     if (zoomLevel <= 4) {
                         // Nascondi i marker e i label tranne quello di Wittenberg
-                        if (place.title_it !== "Wittenberg" && place.title_de !== "Wittenberg" && place.title_en !==
+                        if (place.title_it !== "Wittenberg" && place.title_de !== "Wittenberg" && place
+                            .title_en !==
                             "Wittenberg") {
                             marker.setMap(null); // Rimuovi il marker dalla mappa
                         } else {
@@ -509,11 +500,8 @@
                     }
                 });
             }
-
-
             // Applicare la visibilità iniziale dei marker in base al livello di zoom
             toggleMarkersByZoom(map.getZoom());
-
             // Listener per il cambio di livello di zoom
             google.maps.event.addListener(map, 'zoom_changed', function() {
                 let zoomLevel = map.getZoom(); // Ottieni il livello di zoom attuale
@@ -521,15 +509,11 @@
             });
         }
 
-
-
-
         function drawVShape(destination, placeId) {
             // Rimuovi eventuali linee esistenti per il marker corrente
             if (lineMapping[placeId]) {
                 lineMapping[placeId].forEach(line => line.setMap(null));
             }
-
             // Crea i punti per la linea "V"
             let mid = {
                 lat: (wittenberg.lat + destination.lat) / 2,
@@ -542,7 +526,6 @@
                 lat: -dy * offsetFactor,
                 lng: dx * offsetFactor
             };
-
             let leftPoint = {
                 lat: mid.lat + offset.lat,
                 lng: mid.lng + offset.lng
@@ -551,7 +534,6 @@
                 lat: mid.lat - offset.lat,
                 lng: mid.lng - offset.lng
             };
-
             // Crea le linee "V"
             let lineLeft = new google.maps.Polyline({
                 path: [wittenberg, leftPoint],
@@ -581,53 +563,44 @@
                 }],
                 map: map,
             });
-
             // Memorizza le linee "V" in lineMapping
             lineMapping[placeId] = [lineLeft, lineRight];
         }
-
-
-
         // Pre-renderizza gli infoBox (una volta sola) per ogni luogo, in base all'ordine dei dati
         function renderInfoBoxes() {
-    let infoBoxesContainer = document.getElementById("infoBoxes");
-
-    places.forEach((place, index) => {
-        let box = document.getElementById("infoBox-" + place.id);
-
-        if (!box) { // Se la infoBox non esiste, creiamo una nuova box
-         
-            box = document.createElement("div");
-            box.className = "infoBox";
-            box.id = "infoBox-" + place.id;
-            box.style.display = "none"; // Impostiamo che sia inizialmente nascosto
-            if(place.title_it == "Wittenberg"){
-            box.style.backgroundColor ="#eeebe2";
-          }
-            // Posizione fissa in base all'ordine dei dati
-            let topOffset = 10 + index * 2;
-            let leftOffset = 10 + index * 2;
-            box.style.top = `${topOffset}vh`;
-            box.style.left = `${leftOffset}vw`;
-
-            // Impostiamo il contenuto per la lingua attuale
-            box.innerHTML = `<img src="https://lutherlexiconmap.education/wp-content/themes/lutherlexiconmap/images/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> ${getPopupContent(place)}`;
-
-            infoBoxesContainer.appendChild(box);
-        } else {
-            // Se l'infoBox esiste già, aggiorniamo solo il contenuto
-            box.innerHTML = `<img src="https://lutherlexiconmap.education/wp-content/themes/lutherlexiconmap/images/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> ${getPopupContent(place)}`;
+            let infoBoxesContainer = document.getElementById("infoBoxes");
+            places.forEach((place, index) => {
+                let box = document.getElementById("infoBox-" + place.id);
+                if (!box) { // Se la infoBox non esiste, creiamo una nuova box
+                    box = document.createElement("div");
+                    box.className = "infoBox";
+                    box.id = "infoBox-" + place.id;
+                    box.style.display = "none"; // Impostiamo che sia inizialmente nascosto
+                    if (place.title_it == "Wittenberg") {
+                        box.style.backgroundColor = "#eeebe2";
+                    }
+                    // Posizione fissa in base all'ordine dei dati
+                    let topOffset = 10 + index * 2;
+                    let leftOffset = 10 + index * 2;
+                    box.style.top = `${topOffset}vh`;
+                    box.style.left = `${leftOffset}vw`;
+                    // Impostiamo il contenuto per la lingua attuale
+                    box.innerHTML =
+                        `<img src="https://lutherlexiconmap.education/wp-content/themes/lutherlexiconmap/images/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> ${getPopupContent(place)}`;
+                    infoBoxesContainer.appendChild(box);
+                } else {
+                    // Se l'infoBox esiste già, aggiorniamo solo il contenuto
+                    box.innerHTML =
+                        `<img src="https://lutherlexiconmap.education/wp-content/themes/lutherlexiconmap/images/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> ${getPopupContent(place)}`;
+                }
+            });
         }
-    });
-}
-
         // Mostra l'infoBox per un luogo (non duplicandolo)
         function showInfoBox(placeId) {
             let box = document.getElementById("infoBox-" + placeId);
             if (box) {
                 box.style.display = "block";
             }
-
             // Mostra la linea associata a questo luogo
             if (lineMapping[placeId]) {
                 lineMapping[placeId].forEach(line => line.setMap(map));
@@ -639,7 +612,6 @@
             if (box) {
                 box.style.display = "none";
             }
-
             // Se esistono linee "V" per questo placeId, rimuovile
             if (lineMapping[placeId]) {
                 // Rimuovi le linee "V" dalla mappa
@@ -648,8 +620,6 @@
                 delete lineMapping[placeId];
             }
         }
-
-
         // Ritorna il testo dell'etichetta del marker in base alla lingua corrente
         function getLabel(place) {
             if (currentLang === "IT") return place.title_it;
@@ -657,154 +627,187 @@
             if (currentLang === "EN") return place.title_en;
             return "";
         }
-
         // Ritorna il contenuto dell'infoBox in base alla lingua corrente
         function getPopupContent(place) {
-          if (place.title_it === "Wittenberg"){
-            if (currentLang === "IT") return `<span class="title-box">${place.title_it}</span></div> <p>${place.content_it}</p>`;
-            if (currentLang === "DE") return `<span class="title-box">${place.title_de}</span></div> <p>${place.content_de}</p>`;
-            if (currentLang === "EN") return `<span class="title-box">${place.title_en}</span></div> <p>${place.content_en}</p>`;
-          } else {
-            if (currentLang === "IT") return `<span class="title-box">${place.title_it}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_it}</p></div> <p>${place.content_it}</p>`;
-            if (currentLang === "DE") return `<span class="title-box">${place.title_de}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_de}</p>`;
-            if (currentLang === "EN") return `<span class="title-box">${place.title_en}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_en}</p></div> <p>${place.content_en}</p>`;
-          }
-             return "";
+            if (place.title_it === "Wittenberg") {
+                if (currentLang === "IT")
+                return `<span class="title-box">${place.title_it}</span></div> <p>${place.content_it}</p>`;
+                if (currentLang === "DE")
+                return `<span class="title-box">${place.title_de}</span></div> <p>${place.content_de}</p>`;
+                if (currentLang === "EN")
+                return `<span class="title-box">${place.title_en}</span></div> <p>${place.content_en}</p>`;
+            } else {
+                if (currentLang === "IT")
+                return `<span class="title-box">${place.title_it}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_it}</p></div> <p>${place.content_it}</p>`;
+                if (currentLang === "DE")
+                return `<span class="title-box">${place.title_de}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_de}</p>`;
+                if (currentLang === "EN")
+                return `<span class="title-box">${place.title_en}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_en}</p></div> <p>${place.content_en}</p>`;
+            }
+            return "";
         }
-
         // Cambia lingua e aggiorna marker, infoBox e menu
-       
-// Cambia lingua e aggiorna marker, infoBox e menu
-function changeLang(lang) {
-
-
-  var customIconDot = {
+        // Cambia lingua e aggiorna marker, infoBox e menu
+        function changeLang(lang) {
+            var customIconDot = {
                 url: 'https://lutherlexiconmap.education/wp-content/themes/lutherlexiconmap/images/icon-dot-black.svg', // URL dell'immagine
                 scaledSize: new google.maps.Size(20, 20), // Dimensioni dell'icona
                 origin: new google.maps.Point(0, 0), // Punto di origine
                 anchor: new google.maps.Point(10, 10) // Punto di ancoraggio
             };
-
-    if (currentLang !== lang) {
-        currentLang = lang;
-
-        // Rimuovi tutti i marker esistenti dalla mappa
-        for (let placeId in markers) {
-            markers[placeId].setMap(null); // Rimuove il marker dalla mappa
-        }
-
-        // Re-crea i marker per ogni luogo con la lingua selezionata
-        places.forEach((place) => {
-            let marker;
-            let label = getLabel(place); // Etichetta dinamica per la lingua selezionata
-
-            // Creazione del marker, personalizzato per Wittenberg
-            if (label === "Wittenberg") {
-                marker = new markerWithLabel.MarkerWithLabel({
-                    position: {
-                        lat: parseFloat(place.latitude),
-                        lng: parseFloat(place.longitude),
-                    },
-                    map: map,
-                    labelContent: "Wittenberg", // Etichetta
-                    labelAnchor: new google.maps.Point(-40, -40), // Posizione dell'etichetta
-                    labelClass: "marker-label", // Classe CSS per l'etichetta
-                    icon: customIconDot, // Icona personalizzata
-                });
-            } else {
-                marker = new markerWithLabel.MarkerWithLabel({
-                    position: {
-                        lat: parseFloat(place.latitude),
-                        lng: parseFloat(place.longitude),
-                    },
-                    map: map,
-                    labelContent: label, // Etichetta dinamica
-                    labelAnchor: new google.maps.Point(-50, 0), // Posizione dell'etichetta
-                    labelClass: "marker-label", // Classe CSS per l'etichetta
-                    icon: {
-                        url: "", // Nessuna icona personalizzata
-                        size: new google.maps.Size(0, 0), // La dimensione è nulla
-                        anchor: new google.maps.Point(0, 0), // Ancoraggio
-                        scaledSize: new google.maps.Size(0, 0), // Nessuna scala
-                    },
-                });
-            }
-
-            // Memorizza il nuovo marker
-            markers[place.id] = marker;
-
-            // Aggiungi l'evento di clic per il marker
-            marker.addListener("click", () => {
-                if (label !== "Wittenberg") {
-                    let destination = {
-                        lat: parseFloat(place.latitude),
-                        lng: parseFloat(place.longitude)
-                    };
-                    drawVShape(destination, place.id); // Disegna la forma V
-                } else {
-                    if (lineMapping[place.id]) {
-                        lineMapping[place.id].forEach(line => line.setMap(null)); // Rimuovi le linee esistenti
-                        delete lineMapping[place.id]; // Elimina la mappatura delle linee
-                    }
+            if (currentLang !== lang) {
+                currentLang = lang;
+                // Rimuovi tutti i marker esistenti dalla mappa
+                for (let placeId in markers) {
+                    markers[placeId].setMap(null); // Rimuove il marker dalla mappa
                 }
-                showInfoBox(place.id); // Mostra la info box
-            });
-        });
-
-        // Cambia il titolo della sezione "Luoghi"
-        document.getElementById("titlePlaceText").innerText =
-            currentLang === "IT" ? "Luoghi" : currentLang === "DE" ? "Orte" : "Locations";
-
-        // Re-renderizza le infoBox con i nuovi contenuti
-        renderInfoBoxes();
-    }
-}
-
-
+                // Re-crea i marker per ogni luogo con la lingua selezionata
+                places.forEach((place) => {
+                    let marker;
+                    let label = getLabel(place); // Etichetta dinamica per la lingua selezionata
+                    // Creazione del marker, personalizzato per Wittenberg
+                    if (label === "Wittenberg") {
+                        marker = new markerWithLabel.MarkerWithLabel({
+                            position: {
+                                lat: parseFloat(place.latitude),
+                                lng: parseFloat(place.longitude),
+                            },
+                            map: map,
+                            labelContent: "Wittenberg", // Etichetta
+                            labelAnchor: new google.maps.Point(-40, -40), // Posizione dell'etichetta
+                            labelClass: "marker-label", // Classe CSS per l'etichetta
+                            icon: customIconDot, // Icona personalizzata
+                        });
+                    } else {
+                        marker = new markerWithLabel.MarkerWithLabel({
+                            position: {
+                                lat: parseFloat(place.latitude),
+                                lng: parseFloat(place.longitude),
+                            },
+                            map: map,
+                            labelContent: label, // Etichetta dinamica
+                            labelAnchor: new google.maps.Point(-50, 0), // Posizione dell'etichetta
+                            labelClass: "marker-label", // Classe CSS per l'etichetta
+                            icon: {
+                                url: "", // Nessuna icona personalizzata
+                                size: new google.maps.Size(0, 0), // La dimensione è nulla
+                                anchor: new google.maps.Point(0, 0), // Ancoraggio
+                                scaledSize: new google.maps.Size(0, 0), // Nessuna scala
+                            },
+                        });
+                    }
+                    // Memorizza il nuovo marker
+                    markers[place.id] = marker;
+                    // Aggiungi l'evento di clic per il marker
+                    marker.addListener("click", () => {
+                        if (label !== "Wittenberg") {
+                            let destination = {
+                                lat: parseFloat(place.latitude),
+                                lng: parseFloat(place.longitude)
+                            };
+                            drawVShape(destination, place.id); // Disegna la forma V
+                        } else {
+                            if (lineMapping[place.id]) {
+                                lineMapping[place.id].forEach(line => line.setMap(
+                                null)); // Rimuovi le linee esistenti
+                                delete lineMapping[place.id]; // Elimina la mappatura delle linee
+                            }
+                        }
+                        showInfoBox(place.id); // Mostra la info box
+                    });
+                });
+                // Cambia il titolo della sezione "Luoghi"
+                document.getElementById("titlePlaceText").innerText =
+                    currentLang === "IT" ? "Luoghi" : currentLang === "DE" ? "Orte" : "Locations";
+               
+                document.getElementById("titleKeywordText").innerText =
+                    currentLang === "IT" ? "Parole Chiave" : currentLang === "DE" ? "Schlüsselwörter" : "Keywords";
+               
+                    // Re-renderizza le infoBox con i nuovi contenuti
+                renderInfoBoxes();
+            }
+        }
+       
         document.querySelectorAll(".placeItem").forEach((item) => {
             item.addEventListener("click", function() {
                 const lat = parseFloat(item.getAttribute("data-lat"));
                 const lng = parseFloat(item.getAttribute("data-lng"));
                 const id = item.getAttribute("data-id");
                 map.setZoom(5)
-                
                 map.panTo({
                     lat,
                     lng
                 });
-
-
                 // Chiamata per disegnare la "V" per il luogo
                 let destination = {
                     lat,
                     lng
                 };
                 drawVShape(destination, id);
-
                 showInfoBox(id);
             });
         });
+
+        document.querySelectorAll(".keywordItem").forEach((item) => {
+    item.addEventListener("click", function() {
+        const keywordId = item.getAttribute("data-id");
+        // Filtra tutte le places che hanno questa keyword
+        let matchedPlaces = places.filter(place => place.keyword.id == keywordId);
+        
+        if (matchedPlaces.length > 0) {
+            // Per comodità, centra la mappa sulla prima place trovata
+            let firstPlace = matchedPlaces[0];
+            map.setZoom(5);
+            map.panTo({
+                lat: parseFloat(firstPlace.latitude),
+                lng: parseFloat(firstPlace.longitude)
+            });
+            
+            // Per ogni place corrispondente, disegna la "V" e mostra l'infoBox
+            matchedPlaces.forEach(place => {
+                let destination = {
+                    lat: parseFloat(place.latitude),
+                    lng: parseFloat(place.longitude)
+                };
+                drawVShape(destination, place.id);
+                showInfoBox(place.id);
+            });
+        }
+    });
+});
 
 
 
         // Mostra/nasconde il menu "Luoghi" al passaggio del mouse
         let titlePlace = document.getElementById("titlePlace");
+        let titleKeyword = document.getElementById("titleKeyword");
         let listPlaces = document.getElementById("listPlaces");
+        let listKeywords = document.getElementById("listKeywords")
+
         titlePlace.addEventListener("mouseover", () => {
             listPlaces.style.display = "flex";
             titlePlace.classList.add("selected");
         });
+
         titlePlace.addEventListener("mouseout", () => {
             listPlaces.style.display = "none";
             titlePlace.classList.remove("selected");
+        });
+
+        titleKeyword.addEventListener("mouseover", () => {
+            listKeywords.style.display = "flex";
+            titleKeyword.classList.add("selected");
+        });
+        
+        titleKeyword.addEventListener("mouseout", () => {
+            listKeywords.style.display = "none";
+            titleKeyword.classList.remove("selected");
         });
 
         function openAbout() {
             alert("Sezione About da implementare.");
         }
     </script>
-
-
 
 </body>
 

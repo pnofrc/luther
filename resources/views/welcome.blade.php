@@ -227,11 +227,31 @@
         .mobile{
             display: none;
         }
+
+        #year{
+            width: 50%;
+        }
+
+
+        .left{
+            width: 75%;
+            display: flex;
+            justify-content: space-between;
+        }
    
          @media screen and (max-width: 800px) {
             
             .mobile{
             display: block;
+        }
+        .left{
+            width: 100%;
+            border-bottom: 1px solid;
+            flex-direction: row-reverse;
+        }
+
+        #descWebsite{
+            text-align: right
         }
 
         #header{
@@ -243,11 +263,7 @@
         }
             #year{ display: none;}
 
-            .left{
-                display: flex;
-                justify-content: space-between;
-                border-bottom:1px solid
-            }
+         
 
             #descWebsite{
                 width: 80%;
@@ -257,17 +273,21 @@
                 margin-top: .5rem;
             }
 
-            .right div:nth-child(2){
+            .right div:nth-child(1){
                 align-items: start;
                 border-left: unset;
             }
-            .right div:nth-child(3){
+            .right div:nth-child(2){
                 align-items: center;
             }
-            .right div:nth-child(4){
+            .right div:nth-child(3){
                 align-items: flex-end;
                 display: flex;
                 flex-direction: column;
+            }
+
+            #listKeywords{
+                align-items: baseline;
             }
 
 
@@ -338,12 +358,11 @@
                 Mappa digitale del lessico politico-religioso di Lutero in Europa
             </span>
 
-            <span class="padding mobile">16C. 1521</span>
+            <span class="padding year">16C. 1521</span>
 
         </div>
 
         <div class="right">
-            <span id="year" class="padding">16C. 1521</span>
 
             <div class="padding pointer places" id="titleKeyword">
                 <span id="titleKeywordText">Parole Chiave</span>
@@ -393,7 +412,10 @@
         async defer></script>
     <script src="https://unpkg.com/@googlemaps/markerwithlabel/dist/index.min.js"></script>
     <script>
-        var isMobile = false; // Inizialmente, assumiamo che non siamo su un dispositivo mobile
+ 
+        let zIndexInc = 0;
+        
+        var isMobile = false; 
         if (window.innerWidth <= 960) {
             isMobile = true;
         }
@@ -648,8 +670,7 @@
                 toggleMarkersByZoom(zoomLevel); // Applica la logica per i marker in base al nuovo zoom
             });
         }
-
-        let zIndexInc = 0;
+     
         let topInc = 0;
 
 function dragElement(elmnt) {
@@ -679,13 +700,13 @@ function dragElement(elmnt) {
             topInc++
             elmnt.style.top = topInc
         }
-        e.preventDefault();
+        // e.preventDefault();
         pos3 = e.clientX;
         pos4 = e.clientY;
     }
 
     function elementDrag(e) {
-        e.preventDefault();
+        // e.preventDefault();
         let clientX, clientY;
 
         if (e.touches) {
@@ -943,6 +964,9 @@ function dragElement(elmnt) {
                 document.getElementById("titleKeywordText").innerText =
                     currentLang === "IT" ? "Parole Chiave" : currentLang === "DE" ? "Schlüsselwörter" : "Keywords";
                
+                    document.getElementById("aboutText").innerHTML =
+                    currentLang === "IT" ? about.about_it : currentLang === "DE" ? about.about_de : about.about_en;
+
                     toggleMarkersByZoom(map.getZoom());
                     // Re-renderizza le infoBox con i nuovi contenuti
                 renderInfoBoxes();
@@ -997,6 +1021,8 @@ function dragElement(elmnt) {
                 };
                 drawVShape(destination, id);
                 showInfoBox(id);
+                zIndexInc++;
+                item.style.zIndex = zIndexInc;
             });
         });
         
@@ -1004,6 +1030,8 @@ function dragElement(elmnt) {
         document.querySelectorAll(".keywordItem").forEach((item) => {
     item.addEventListener("click", function() {
         openBoxFromKeyword(item)
+        zIndexInc++;
+        item.style.zIndex = zIndexInc;
     });
 });
 
@@ -1060,7 +1088,7 @@ let box = document.getElementById("aboutBox");
     box.style.left = `${leftOffset}vw`;
     // Impostiamo il contenuto per la lingua attuale
     box.innerHTML =
-        `<img src="/icon-close.svg" class="closeBtn" onclick="closeAbout()"> <span>${about.about_it}</span>`;
+        `<img src="/icon-close.svg" class="closeBtn" onclick="closeAbout()"> <span id="aboutText">${about.about_it}</span>`;
     box.style.display ="block"
 }
     </script>

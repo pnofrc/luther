@@ -274,7 +274,9 @@
             .infoBox{
                 line-height: 5vmin;
                 font-size: 5vmin;
-                width: 70%;
+                width: 80vw;
+                max-width: 80vw;
+                left: 5vw !important;
                 z-index: 2;
                 overflow-y: scroll;
                 max-height: 50vh;
@@ -648,6 +650,7 @@
         }
 
         let zIndexInc = 0;
+        let topInc = 0;
 
 function dragElement(elmnt) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -672,6 +675,10 @@ function dragElement(elmnt) {
         zIndexInc++;
         elmnt.style.zIndex = zIndexInc;
 
+        if (window.matchMedia("(max-width: 800px)").matches) {
+            topInc++
+            elmnt.style.top = topInc
+        }
         e.preventDefault();
         pos3 = e.clientX;
         pos4 = e.clientY;

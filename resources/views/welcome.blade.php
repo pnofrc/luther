@@ -182,7 +182,9 @@
             /* font-size: 1.2vw; */
             line-height: 1.2em;
             z-index: 9999;
-            pointer-events: all
+            pointer-events: all;
+            max-height: 65%;
+            overflow-y: scroll;
         }
 
         .closeBtn {
@@ -272,7 +274,7 @@
             .infoBox{
                 line-height: 5vmin;
                 font-size: 5vmin;
-                width: 50%;
+                width: 70%;
                 z-index: 2;
                 overflow-y: scroll;
                 max-height: 50vh;
@@ -648,70 +650,62 @@
         let zIndexInc = 0;
 
 function dragElement(elmnt) {
-    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
-    // Gestisci eventi per il mouse
-    elmnt.onmousedown = dragMouseDown;
-    
-    // Gestisci eventi per il touch
-    elmnt.ontouchstart = dragTouchStart;
+    elmnt.addEventListener("mousedown", dragMouseDown);
+    elmnt.addEventListener("touchstart", dragTouchStart, { passive: false });
 
     function dragMouseDown(e) {
-        zIndexInc++;
-        elmnt.style.zIndex = zIndexInc;
-
-        e = e || window.event;
-        // e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
+        startDrag(e);
+        document.addEventListener("mousemove", elementDrag);
+        document.addEventListener("mouseup", closeDragElement);
     }
 
     function dragTouchStart(e) {
+        if (e.touches.length > 1) return; // Ignora il multi-touch
+        startDrag(e.touches[0]);
+        document.addEventListener("touchmove", elementDrag, { passive: false });
+        document.addEventListener("touchend", closeDragElement);
+    }
+
+    function startDrag(e) {
         zIndexInc++;
         elmnt.style.zIndex = zIndexInc;
 
-        e = e.touches[0] || e.changedTouches[0]; // Prendi il primo touch
         e.preventDefault();
         pos3 = e.clientX;
         pos4 = e.clientY;
-        document.ontouchend = closeDragElement;
-        document.ontouchmove = elementDrag;
     }
 
     function elementDrag(e) {
-        e = e || window.event;
         e.preventDefault();
+        let clientX, clientY;
 
-        // Per il mouse
-        if (e.clientX && e.clientY) {
-            pos1 = pos3 - e.clientX;
-            pos2 = pos4 - e.clientY;
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-        }
-
-        // Per il touch
         if (e.touches) {
-            pos1 = pos3 - e.touches[0].clientX;
-            pos2 = pos4 - e.touches[0].clientY;
-            pos3 = e.touches[0].clientX;
-            pos4 = e.touches[0].clientY;
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
         }
+
+        pos1 = pos3 - clientX;
+        pos2 = pos4 - clientY;
+        pos3 = clientX;
+        pos4 = clientY;
 
         elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
         elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
     }
 
     function closeDragElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-
-        document.ontouchend = null;
-        document.ontouchmove = null;
+        document.removeEventListener("mousemove", elementDrag);
+        document.removeEventListener("mouseup", closeDragElement);
+        document.removeEventListener("touchmove", elementDrag);
+        document.removeEventListener("touchend", closeDragElement);
     }
 }
+
 
         function drawVShape(destination, placeId) {
             // Rimuovi eventuali linee esistenti per il marker corrente

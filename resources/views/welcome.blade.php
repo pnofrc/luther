@@ -74,6 +74,8 @@
             display: flex;
             justify-content: space-between;
             margin: 1.5vw;
+            z-index: 999999999;
+            align-items: baseline;
         }
 
         #bottom {
@@ -93,11 +95,25 @@
             justify-content: space-around;
         }
 
-        .right>span {
+        .about {
             border-left: 1px solid;
             width: 100%;
-        }
 
+        }
+    #aboutBox{
+    background-color: rgb(238, 235, 226);
+    display:none;
+    width: 70vw;
+    max-width: 70vw;
+    max-height: 60vh;
+  overflow-y: scroll;
+  
+    }
+
+    #aboutBox span{
+        margin-top: 5vh;
+  display: block;
+    }
         #lang span {
             cursor: pointer;
         }
@@ -164,17 +180,18 @@
             border: 1px solid #000;
             max-width: 300px;
             /* font-size: 1.2vw; */
-            line-height: 1.4vw;
+            line-height: 1.2em;
             z-index: 9999;
             pointer-events: all
         }
 
         .closeBtn {
             position: absolute;
-            top: 4%;
-            right: 6%;
-            width: 4%;
-            cursor: pointer !important
+            top: 3vmin;
+            right: 3vmin;
+            width: 3vmin;
+            cursor: pointer !important;
+            z-index: 99999999999;
         }
 
         .marker-label {
@@ -208,36 +225,72 @@
         .mobile{
             display: none;
         }
-
+   
+         @media screen and (max-width: 800px) {
+            
+            .mobile{
+            display: block;
+        }
 
         #header{
-            display: none
-        }
-        
-        .mobile{
             display: flex;
-            z-index: 999999;
-            position: relative;
-            border-bottom: 1px solid;
-            padding: 2px;
-            margin: 1.5vw;
+            flex-direction: column;
+            border-left: unset;
+            border-right: unset;
+            border-top:unset;
         }
-        .mobile .places{
-            border: unset
-        }
-        
-        #descWebsiteMobile{
-           border-right: 1px solid;
-            display: block;
-            
-        }
+            #year{ display: none;}
+
+            .left{
+                display: flex;
+                justify-content: space-between;
+                border-bottom:1px solid
+            }
+
+            #descWebsite{
+                width: 80%;
+            }
+            .right{
+                width: 100%;
+                margin-top: .5rem;
+            }
+
+            .right div:nth-child(2){
+                align-items: start;
+                border-left: unset;
+            }
+            .right div:nth-child(3){
+                align-items: center;
+            }
+            .right div:nth-child(4){
+                align-items: flex-end;
+                display: flex;
+                flex-direction: column;
+            }
+
+
+            .infoBox{
+                line-height: 5vmin;
+                font-size: 5vmin;
+                width: 50%;
+                z-index: 2;
+                overflow-y: scroll;
+                max-height: 50vh;
+            }
+
+    }
+
+    .nested{
+        border-bottom: 1px solid;
+    }
     </style>
 </head>
 
 <body>
     <div id="infoBoxes"></div>
 
-    <div class="mobile">
+    
+    {{-- <div class="mobile">
         <span class="padding" id="descWebsiteMobile">
             Mappa digitale del lessico politico-religioso di Lutero in Europa
         </span>
@@ -245,7 +298,7 @@
     </div>
 
     <div class="mobile">
-        <div class="padding pointer places" id="titleKeyword">
+        <div class="padding pointer places" id="titleKeywordMobile">
             <span id="titleKeywordText">Parole Chiave</span>
             <div id="listKeywords">
                 @foreach ($keywords as $keyword)
@@ -256,7 +309,7 @@
             </div>
         </div>
 
-        <div class="padding pointer places" id="titlePlace">
+        <div class="padding pointer places" id="titlePlaceMobile">
             <span id="titlePlaceText">Luoghi</span>
             <div id="listPlaces">
                 @foreach ($places as $place)
@@ -271,13 +324,20 @@
         <span class="padding pointer" onclick="openAbout()">
             <span class="attribute" id="titleAbout">About</span>
         </span>
-    </div>
+    </div> --}}
 
 
     <div id="header">
-        <span class="padding" id="descWebsite">
-            Mappa digitale del lessico politico-religioso di Lutero in Europa
-        </span>
+        <div class="left">
+            
+            <span class="padding" id="descWebsite">
+                Mappa digitale del lessico politico-religioso di Lutero in Europa
+            </span>
+
+            <span class="padding mobile">16C. 1521</span>
+
+        </div>
+
         <div class="right">
             <span id="year" class="padding">16C. 1521</span>
 
@@ -304,12 +364,17 @@
                 </div>
             </div>
             
-            <span class="padding pointer" onclick="openAbout()">
+            <div class="padding pointer about" onclick="openAbout()">
                 <span class="attribute" id="titleAbout">About</span>
-            </span>
+            </div>
         </div>
     </div>
 
+    <div id="aboutBox" class="infoBox">
+
+    </div>
+
+    
     <div id="bottom">
         <div id="coord" class="selected"></div>
         <div id="lang" class="selected">
@@ -344,6 +409,7 @@
         let markers = {};
         let currentLang = "IT";
         let connectionLine = null; // Per la linea tratteggiata
+        let about = {!!json_encode($about -> toArray())!!}
         let places = {!!json_encode($places -> toArray())!!}; // Dati dai backend
         let keywords = {!!json_encode($keywords -> toArray())!!}; // Dati dai backend
         // Imposta manualmente le coordinate di Wittenberg
@@ -579,46 +645,73 @@
             });
         }
 
-        let zIndexInc = 0
-        function dragElement(elmnt) {
-                    var pos1 = 0,
-                        pos2 = 0,
-                        pos3 = 0,
-                        pos4 = 0;
-                    elmnt.onmousedown = dragMouseDown;
+        let zIndexInc = 0;
 
-                    
+function dragElement(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
-                    function dragMouseDown(e) {
-                        // funzione per sovraimprimere
-                        zIndexInc++
-                        elmnt.style.zIndex = zIndexInc
+    // Gestisci eventi per il mouse
+    elmnt.onmousedown = dragMouseDown;
+    
+    // Gestisci eventi per il touch
+    elmnt.ontouchstart = dragTouchStart;
 
-                        e = e || window.event;
-                        e.preventDefault();
-                        pos3 = e.clientX;
-                        pos4 = e.clientY;
-                        document.onmouseup = closeDragElement;
-                        document.onmousemove = elementDrag;
-                    }
+    function dragMouseDown(e) {
+        zIndexInc++;
+        elmnt.style.zIndex = zIndexInc;
 
-                    function elementDrag(e) {
-                        e = e || window.event;
-                        e.preventDefault();
-                        pos1 = pos3 - e.clientX;
-                        pos2 = pos4 - e.clientY;
-                        pos3 = e.clientX;
-                        pos4 = e.clientY;
-                        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-                        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-                    }
+        e = e || window.event;
+        // e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
 
-                    function closeDragElement() {
-                        document.onmouseup = null;
-                        document.onmousemove = null;
-                    }
-                }
-               
+    function dragTouchStart(e) {
+        zIndexInc++;
+        elmnt.style.zIndex = zIndexInc;
+
+        e = e.touches[0] || e.changedTouches[0]; // Prendi il primo touch
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.ontouchend = closeDragElement;
+        document.ontouchmove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+
+        // Per il mouse
+        if (e.clientX && e.clientY) {
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+        }
+
+        // Per il touch
+        if (e.touches) {
+            pos1 = pos3 - e.touches[0].clientX;
+            pos2 = pos4 - e.touches[0].clientY;
+            pos3 = e.touches[0].clientX;
+            pos4 = e.touches[0].clientY;
+        }
+
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+
+        document.ontouchend = null;
+        document.ontouchmove = null;
+    }
+}
 
         function drawVShape(destination, placeId) {
             // Rimuovi eventuali linee esistenti per il marker corrente
@@ -859,7 +952,31 @@
            
         }
 
+        function openBoxFromKeyword(item){
+            const keywordId = item.getAttribute("data-id");
+        // Filtra tutte le places che hanno questa keyword
+        let matchedPlaces = places.filter(place => place.keyword.id == keywordId);
         
+        if (matchedPlaces.length > 0) {
+            // Per comodità, centra la mappa sulla prima place trovata
+            let firstPlace = matchedPlaces[0];
+            map.setZoom(5);
+            map.panTo({
+                lat: parseFloat(firstPlace.latitude),
+                lng: parseFloat(firstPlace.longitude)
+            });
+            
+            // Per ogni place corrispondente, disegna la "V" e mostra l'infoBox
+            matchedPlaces.forEach(place => {
+                let destination = {
+                    lat: parseFloat(place.latitude),
+                    lng: parseFloat(place.longitude)
+                };
+                drawVShape(destination, place.id);
+                showInfoBox(place.id);
+            });
+        }
+        }
        
         document.querySelectorAll(".placeItem").forEach((item) => {
 
@@ -885,35 +1002,15 @@
 
         document.querySelectorAll(".keywordItem").forEach((item) => {
     item.addEventListener("click", function() {
-        const keywordId = item.getAttribute("data-id");
-        // Filtra tutte le places che hanno questa keyword
-        let matchedPlaces = places.filter(place => place.keyword.id == keywordId);
-        
-        if (matchedPlaces.length > 0) {
-            // Per comodità, centra la mappa sulla prima place trovata
-            let firstPlace = matchedPlaces[0];
-            map.setZoom(5);
-            map.panTo({
-                lat: parseFloat(firstPlace.latitude),
-                lng: parseFloat(firstPlace.longitude)
-            });
-            
-            // Per ogni place corrispondente, disegna la "V" e mostra l'infoBox
-            matchedPlaces.forEach(place => {
-                let destination = {
-                    lat: parseFloat(place.latitude),
-                    lng: parseFloat(place.longitude)
-                };
-                drawVShape(destination, place.id);
-                showInfoBox(place.id);
-            });
-        }
+        openBoxFromKeyword(item)
     });
 });
 
 
+
+
 function setupDropdown(title, list) {
-    if (window.matchMedia("(max-width: 768px)").matches) {
+    if (window.matchMedia("(max-width: 800px)").matches) {
         // Se è mobile, aggiungiamo il toggle con il click
         title.addEventListener("click", () => {
             const isVisible = list.style.display === "flex";
@@ -950,9 +1047,21 @@ const listKeywords = document.getElementById("listKeywords");
 setupDropdown(titlePlace, listPlaces);
 setupDropdown(titleKeyword, listKeywords);
 
-        function openAbout() {
-            alert("Sezione About da implementare.");
-        }
+function closeAbout(){
+    document.getElementById("aboutBox").style.display = 'none'
+}
+function openAbout(){
+let box = document.getElementById("aboutBox");
+    dragElement(box)
+    let topOffset = 7;
+    let leftOffset = 15;
+    box.style.top = `${topOffset}vh`;
+    box.style.left = `${leftOffset}vw`;
+    // Impostiamo il contenuto per la lingua attuale
+    box.innerHTML =
+        `<img src="/icon-close.svg" class="closeBtn" onclick="closeAbout()"> <span>${about.about_it}</span>`;
+    box.style.display ="block"
+}
     </script>
 
 </body>

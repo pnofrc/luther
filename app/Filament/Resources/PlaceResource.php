@@ -28,18 +28,36 @@ class PlaceResource extends Resource
                     Forms\Components\TextInput::make('title_it')->label('Title (IT)'),
                     Forms\Components\TextInput::make('title_de')->label('Title (DE)'),
                     Forms\Components\TextInput::make('title_en')->label('Title (EN)'),
-                    Forms\Components\Textarea::make('content_it')->label('Content (IT)'),
-                    Forms\Components\Textarea::make('content_de')->label('Content (DE)'),
-                    Forms\Components\Textarea::make('content_en')->label('Content (EN)'),
-                    Forms\Components\FileUpload::make('file')->label('Upload PDF')->directory('files'),
-                    Forms\Components\TextInput::make('latitude')->label('Latitude')->numeric()->required(),
-                    Forms\Components\TextInput::make('longitude')->label('Longitude')->numeric()->required(),
+
                     Forms\Components\Select::make('keyword_id')
-                        ->label('Keyword')
+                    ->label('Keyword')
+                    ->options(
+                        Keyword::all()->pluck('title_de', 'id')
+                    )
+                    ->required(),
+
+                    Forms\Components\Select::make('keyword_selector')
+                        ->label('Selettore keyword per collegamenti')
                         ->options(
                             Keyword::all()->pluck('title_de', 'id')
                         )
-                        ->required()
+                        ->reactive()
+                        ->afterStateUpdated(fn ($state, callable $set) =>
+                    $set('keyword_text', 
+                        '<span class="nested keywordItem" onclick="openBoxFromKeyword(this)" data-id="'.Keyword::find($state)?->id.'">'.Keyword::find($state)?->title_de.'</span>')
+                    ),
+
+                    Forms\Components\TextInput::make('keyword_text')
+                            ->label('Copia ed Incolla')
+                    ->readOnly(),
+
+                    Forms\Components\Textarea::make('content_it')->label('Content (IT)')->required(),
+                    Forms\Components\Textarea::make('content_de')->label('Content (DE)')->required(),
+                    Forms\Components\Textarea::make('content_en')->label('Content (EN)')->required(),
+                    Forms\Components\FileUpload::make('file')->label('Upload PDF')->directory('files'),
+                    Forms\Components\TextInput::make('latitude')->label('Latitude')->numeric()->required(),
+                    Forms\Components\TextInput::make('longitude')->label('Longitude')->numeric()->required(),
+                   
             ]);
     }
 

@@ -2,12 +2,12 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
+    
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Luther Lexicon Map</title>
-    <!-- Leaflet CSS e JS -->
-    {{-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> --}}
+    <link rel="icon" type="image/x-icon" href="/icon-dot-black.svg">
+
 
     <style>
         @font-face {
@@ -28,6 +28,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            font-size: 1em;
         }
 
         #map {
@@ -60,14 +61,13 @@
         #coord {
             border-left: 1px solid;
             border-right: 1px solid;
-            padding: 0 .3vw .1vw .3vw;
-            width: 15%;
+            padding: 0 10px;
         }
 
         #header {
             z-index: 3;
             position: relative;
-            font-size: 1.1rem;
+            /* font-size: 1.1rem; */
             border-top: solid 1px;
             border-right: solid 1px;
             border-left: solid 1px;
@@ -78,12 +78,12 @@
 
         #bottom {
             z-index: 2;
-            font-size: 1.1rem;
+            /* font-size: 1em; */
             display: flex;
             justify-content: space-between;
             margin: 1.5vw;
             position: absolute;
-            bottom: 0;
+            bottom: .5rem;
             width: 97vw;
         }
 
@@ -112,7 +112,7 @@
         }
 
 
-        .places,.keywords {
+        .places {
             display: flex;
             width: 100%;
             border-left: solid 1px;
@@ -141,7 +141,7 @@
         }
 
         .my-div-icon .map-label {
-            font-size: 0.9rem;
+            /* font-size: 0.9rem; */
             font-weight: bold;
         }
 
@@ -163,7 +163,7 @@
             width: 24vw;
             border: 1px solid #000;
             max-width: 300px;
-            font-size: 1.2vw;
+            /* font-size: 1.2vw; */
             line-height: 1.4vw;
             z-index: 9999;
             pointer-events: all
@@ -178,7 +178,7 @@
         }
 
         .marker-label {
-            font-size: 1.5vw;
+            font-size: 1.5em;
             font-family: "Fraktur";
 
         }
@@ -202,19 +202,96 @@
         .title-box,
         .keywords span {
             font-family: "Fraktur";
-            font-size: 1.4vw;
+            /* font-size: 1.4vw; */
+        }
+
+        .mobile{
+            display: none;
+        }
+
+
+        #header{
+            display: none
+        }
+        
+        .mobile{
+            display: flex;
+            z-index: 999999;
+            position: relative;
+            border-bottom: 1px solid;
+            padding: 2px;
+            margin: 1.5vw;
+        }
+        .mobile .places{
+            border: unset
+        }
+        
+        #descWebsiteMobile{
+           border-right: 1px solid;
+            display: block;
+            
         }
     </style>
 </head>
 
 <body>
     <div id="infoBoxes"></div>
+
+    <div class="mobile">
+        <span class="padding" id="descWebsiteMobile">
+            Mappa digitale del lessico politico-religioso di Lutero in Europa
+        </span>
+        <span class="padding" id="yearMobile">16C. 1521</span>
+    </div>
+
+    <div class="mobile">
+        <div class="padding pointer places" id="titleKeyword">
+            <span id="titleKeywordText">Parole Chiave</span>
+            <div id="listKeywords">
+                @foreach ($keywords as $keyword)
+                <span class="keywordItem" data-id="{{ $keyword->id }}">
+                    {{ $keyword->title_de }}
+                </span>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="padding pointer places" id="titlePlace">
+            <span id="titlePlaceText">Luoghi</span>
+            <div id="listPlaces">
+                @foreach ($places as $place)
+                <span class="placeItem" data-id="{{ $place->id }}" data-lat="{{ $place->latitude }}"
+                    data-lng="{{ $place->longitude }}">
+                    {{ $place->title_it }}
+                </span>
+                @endforeach
+            </div>
+        </div>
+        
+        <span class="padding pointer" onclick="openAbout()">
+            <span class="attribute" id="titleAbout">About</span>
+        </span>
+    </div>
+
+
     <div id="header">
         <span class="padding" id="descWebsite">
             Mappa digitale del lessico politico-religioso di Lutero in Europa
         </span>
         <div class="right">
-            <span class="padding">16C. 1521</span>
+            <span id="year" class="padding">16C. 1521</span>
+
+            <div class="padding pointer places" id="titleKeyword">
+                <span id="titleKeywordText">Parole Chiave</span>
+                <div id="listKeywords">
+                    @foreach ($keywords as $keyword)
+                    <span class="keywordItem" data-id="{{ $keyword->id }}">
+                        {{ $keyword->title_de }}
+                    </span>
+                    @endforeach
+                </div>
+            </div>
+
             <div class="padding pointer places" id="titlePlace">
                 <span id="titlePlaceText">Luoghi</span>
                 <div id="listPlaces">
@@ -226,16 +303,7 @@
                     @endforeach
                 </div>
             </div>
-            <div class="padding pointer places" id="titleKeyword">
-                <span id="titleKeywordText">Parole Chiave</span>
-                <div id="listKeywords">
-                    @foreach ($keywords as $keyword)
-                    <span class="keywordItem" data-id="{{ $keyword->id }}">
-                        {{ $keyword->title_it }}
-                    </span>
-                    @endforeach
-                </div>
-            </div>
+            
             <span class="padding pointer" onclick="openAbout()">
                 <span class="attribute" id="titleAbout">About</span>
             </span>
@@ -285,6 +353,25 @@
         };
         let connectionLines = [];
         let lineMapping = {};
+
+        function toggleMarkersByZoom(zoomLevel) {
+                places.forEach((place) => {
+                    let marker = markers[place.id];
+                    if (zoomLevel <= 4) {
+                        // Nascondi i marker e i label tranne quello di Wittenberg
+                        if (place.title_it !== "Wittenberg" && place.title_de !== "Wittenberg" && place
+                            .title_en !==
+                            "Wittenberg") {
+                            marker.setMap(null); // Rimuovi il marker dalla mappa
+                        } else {
+                            marker.setMap(map); // Mostra il marker di Wittenberg
+                        }
+                    } else {
+                        // Mostra tutti i marker e i label
+                        marker.setMap(map);
+                    }
+                });
+            }
 
         function initMap() {
             // Inizializzazione della mappa
@@ -482,24 +569,7 @@
             });
             // map.fitBounds(bounds);
             // Funzione per mostrare o nascondere i marker in base al livello di zoom
-            function toggleMarkersByZoom(zoomLevel) {
-                places.forEach((place) => {
-                    let marker = markers[place.id];
-                    if (zoomLevel <= 4) {
-                        // Nascondi i marker e i label tranne quello di Wittenberg
-                        if (place.title_it !== "Wittenberg" && place.title_de !== "Wittenberg" && place
-                            .title_en !==
-                            "Wittenberg") {
-                            marker.setMap(null); // Rimuovi il marker dalla mappa
-                        } else {
-                            marker.setMap(map); // Mostra il marker di Wittenberg
-                        }
-                    } else {
-                        // Mostra tutti i marker e i label
-                        marker.setMap(map);
-                    }
-                });
-            }
+            
             // Applicare la visibilità iniziale dei marker in base al livello di zoom
             toggleMarkersByZoom(map.getZoom());
             // Listener per il cambio di livello di zoom
@@ -508,6 +578,47 @@
                 toggleMarkersByZoom(zoomLevel); // Applica la logica per i marker in base al nuovo zoom
             });
         }
+
+        let zIndexInc = 0
+        function dragElement(elmnt) {
+                    var pos1 = 0,
+                        pos2 = 0,
+                        pos3 = 0,
+                        pos4 = 0;
+                    elmnt.onmousedown = dragMouseDown;
+
+                    
+
+                    function dragMouseDown(e) {
+                        // funzione per sovraimprimere
+                        zIndexInc++
+                        elmnt.style.zIndex = zIndexInc
+
+                        e = e || window.event;
+                        e.preventDefault();
+                        pos3 = e.clientX;
+                        pos4 = e.clientY;
+                        document.onmouseup = closeDragElement;
+                        document.onmousemove = elementDrag;
+                    }
+
+                    function elementDrag(e) {
+                        e = e || window.event;
+                        e.preventDefault();
+                        pos1 = pos3 - e.clientX;
+                        pos2 = pos4 - e.clientY;
+                        pos3 = e.clientX;
+                        pos4 = e.clientY;
+                        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+                    }
+
+                    function closeDragElement() {
+                        document.onmouseup = null;
+                        document.onmousemove = null;
+                    }
+                }
+               
 
         function drawVShape(destination, placeId) {
             // Rimuovi eventuali linee esistenti per il marker corrente
@@ -573,6 +684,7 @@
                 let box = document.getElementById("infoBox-" + place.id);
                 if (!box) { // Se la infoBox non esiste, creiamo una nuova box
                     box = document.createElement("div");
+                    dragElement(box)
                     box.className = "infoBox";
                     box.id = "infoBox-" + place.id;
                     box.style.display = "none"; // Impostiamo che sia inizialmente nascosto
@@ -586,12 +698,12 @@
                     box.style.left = `${leftOffset}vw`;
                     // Impostiamo il contenuto per la lingua attuale
                     box.innerHTML =
-                        `<img src="https://lutherlexiconmap.education/wp-content/themes/lutherlexiconmap/images/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> ${getPopupContent(place)}`;
+                        `<img src="/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> ${getPopupContent(place)}`;
                     infoBoxesContainer.appendChild(box);
                 } else {
                     // Se l'infoBox esiste già, aggiorniamo solo il contenuto
                     box.innerHTML =
-                        `<img src="https://lutherlexiconmap.education/wp-content/themes/lutherlexiconmap/images/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> ${getPopupContent(place)}`;
+                        `<img src="/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> ${getPopupContent(place)}`;
                 }
             });
         }
@@ -637,20 +749,32 @@
                 if (currentLang === "EN")
                 return `<span class="title-box">${place.title_en}</span></div> <p>${place.content_en}</p>`;
             } else {
-                if (currentLang === "IT")
-                return `<span class="title-box">${place.title_it}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_it}</p></div> <p>${place.content_it}</p>`;
-                if (currentLang === "DE")
-                return `<span class="title-box">${place.title_de}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_de}</p>`;
-                if (currentLang === "EN")
-                return `<span class="title-box">${place.title_en}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_en}</p></div> <p>${place.content_en}</p>`;
-            }
+                
+                    if(place.file){
+                        if (currentLang === "IT")
+                        return `<span class="title-box">${place.title_it}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_it}</p> <a href="/storage/${place.file}" download>Download del pdf</a>`;
+                        if (currentLang === "DE")
+                        return `<span class="title-box">${place.title_de}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_de}</p> <a href="/storage/${place.file}" download>Download the pdf</a>`;
+                        if (currentLang === "EN")
+                        return `<span class="title-box">${place.title_en}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_en}</p> <a href="/storage/${place.file}" download>PDF herunterladen</a>`;
+            
+                    } else {
+                        if (currentLang === "IT")
+                        return `<span class="title-box">${place.title_it}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_it}</p>`;
+                        if (currentLang === "DE")
+                        return `<span class="title-box">${place.title_de}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_de}</p>`;
+                        if (currentLang === "EN")
+                        return `<span class="title-box">${place.title_en}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_en}</p>`;
+            
+                    }
+                     }
             return "";
         }
         // Cambia lingua e aggiorna marker, infoBox e menu
         // Cambia lingua e aggiorna marker, infoBox e menu
         function changeLang(lang) {
             var customIconDot = {
-                url: 'https://lutherlexiconmap.education/wp-content/themes/lutherlexiconmap/images/icon-dot-black.svg', // URL dell'immagine
+                url: '/icon-dot-black.svg', // URL dell'immagine
                 scaledSize: new google.maps.Size(20, 20), // Dimensioni dell'icona
                 origin: new google.maps.Point(0, 0), // Punto di origine
                 anchor: new google.maps.Point(10, 10) // Punto di ancoraggio
@@ -698,6 +822,7 @@
                     }
                     // Memorizza il nuovo marker
                     markers[place.id] = marker;
+
                     // Aggiungi l'evento di clic per il marker
                     marker.addListener("click", () => {
                         if (label !== "Wittenberg") {
@@ -714,6 +839,7 @@
                             }
                         }
                         showInfoBox(place.id); // Mostra la info box
+
                     });
                 });
                 // Cambia il titolo della sezione "Luoghi"
@@ -723,12 +849,20 @@
                 document.getElementById("titleKeywordText").innerText =
                     currentLang === "IT" ? "Parole Chiave" : currentLang === "DE" ? "Schlüsselwörter" : "Keywords";
                
+                    toggleMarkersByZoom(map.getZoom());
                     // Re-renderizza le infoBox con i nuovi contenuti
                 renderInfoBoxes();
             }
+
+         
+
+           
         }
+
+        
        
         document.querySelectorAll(".placeItem").forEach((item) => {
+
             item.addEventListener("click", function() {
                 const lat = parseFloat(item.getAttribute("data-lat"));
                 const lng = parseFloat(item.getAttribute("data-lng"));
@@ -747,6 +881,7 @@
                 showInfoBox(id);
             });
         });
+        
 
         document.querySelectorAll(".keywordItem").forEach((item) => {
     item.addEventListener("click", function() {
@@ -777,32 +912,43 @@
 });
 
 
-
-        // Mostra/nasconde il menu "Luoghi" al passaggio del mouse
-        let titlePlace = document.getElementById("titlePlace");
-        let titleKeyword = document.getElementById("titleKeyword");
-        let listPlaces = document.getElementById("listPlaces");
-        let listKeywords = document.getElementById("listKeywords")
-
-        titlePlace.addEventListener("mouseover", () => {
-            listPlaces.style.display = "flex";
-            titlePlace.classList.add("selected");
+function setupDropdown(title, list) {
+    if (window.matchMedia("(max-width: 768px)").matches) {
+        // Se è mobile, aggiungiamo il toggle con il click
+        title.addEventListener("click", () => {
+            const isVisible = list.style.display === "flex";
+            list.style.display = isVisible ? "none" : "flex";
+            title.classList.toggle("selected", !isVisible);
         });
 
-        titlePlace.addEventListener("mouseout", () => {
-            listPlaces.style.display = "none";
-            titlePlace.classList.remove("selected");
+        // Chiudiamo il menu se si clicca fuori
+        document.addEventListener("click", (event) => {
+            if (!title.contains(event.target) && !list.contains(event.target)) {
+                list.style.display = "none";
+                title.classList.remove("selected");
+            }
+        });
+    } else {
+        // Manteniamo il comportamento originale su desktop
+        title.addEventListener("mouseover", () => {
+            list.style.display = "flex";
+            title.classList.add("selected");
         });
 
-        titleKeyword.addEventListener("mouseover", () => {
-            listKeywords.style.display = "flex";
-            titleKeyword.classList.add("selected");
+        title.addEventListener("mouseout", () => {
+            list.style.display = "none";
+            title.classList.remove("selected");
         });
-        
-        titleKeyword.addEventListener("mouseout", () => {
-            listKeywords.style.display = "none";
-            titleKeyword.classList.remove("selected");
-        });
+    }
+}
+
+const titlePlace = document.getElementById("titlePlace");
+const listPlaces = document.getElementById("listPlaces");
+const titleKeyword = document.getElementById("titleKeyword");
+const listKeywords = document.getElementById("listKeywords");
+
+setupDropdown(titlePlace, listPlaces);
+setupDropdown(titleKeyword, listKeywords);
 
         function openAbout() {
             alert("Sezione About da implementare.");

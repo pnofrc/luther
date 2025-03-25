@@ -31,12 +31,13 @@ class PlaceResource extends Resource
                     Forms\Components\Textarea::make('content_it')->label('Content (IT)'),
                     Forms\Components\Textarea::make('content_de')->label('Content (DE)'),
                     Forms\Components\Textarea::make('content_en')->label('Content (EN)'),
+                    Forms\Components\FileUpload::make('file')->label('Upload PDF')->directory('files'),
                     Forms\Components\TextInput::make('latitude')->label('Latitude')->numeric()->required(),
                     Forms\Components\TextInput::make('longitude')->label('Longitude')->numeric()->required(),
                     Forms\Components\Select::make('keyword_id')
                         ->label('Keyword')
                         ->options(
-                            Keyword::all()->pluck('title_it', 'id') // Ottieni tutte le keyword e il loro id
+                            Keyword::all()->pluck('title_de', 'id')
                         )
                         ->required()
             ]);

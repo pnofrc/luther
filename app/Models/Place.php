@@ -13,6 +13,7 @@ class Place extends Model
         'keyword_id',
         'title_it', 'title_de', 'title_en',
         'content_it', 'content_de', 'content_en',
+        'file',
         'latitude', 'longitude'
     ];
 

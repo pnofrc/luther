@@ -22,9 +22,7 @@ class KeywordResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\TextInput::make('title_it')->label('Title (IT)')->required(),
-            Forms\Components\TextInput::make('title_de')->label('Title (DE)')->required(),
-            Forms\Components\TextInput::make('title_en')->label('Title (EN)')->required(),
+            Forms\Components\TextInput::make('title_de')->label('Keyword')->required(),
          ]);
     }
 
@@ -32,9 +30,7 @@ class KeywordResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title_it')->label('Title (IT)'),
-                TextColumn::make('title_de')->label('Title (DE)'),
-                TextColumn::make('title_en')->label('Title (EN)'),
+                TextColumn::make('title_de')->label('Keyword'),
             ])
             ->filters([
                 //

@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('keywords', function (Blueprint $table) {
-            $table->id();
-            $table->string('title_it')->nullable();
-            $table->string('title_de');
-            $table->string('title_en')->nullable();
-            $table->timestamps();
+        Schema::table('places', function (Blueprint $table) {
+            $table->string('file')->nullable();
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('keywords');
+        Schema::table('places', function (Blueprint $table) {
+            $table->dropColumn('file');
+        });
     }
 };

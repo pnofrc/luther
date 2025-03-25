@@ -29,6 +29,17 @@
             padding: 0;
             overflow: hidden;
             font-size: 1em;
+
+        }
+
+        *{
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+
+        }
+
+        *::-webkit-scrollbar {
+            display: none;
         }
 
         #map {
@@ -306,6 +317,14 @@
 
     .nested{
         border-bottom: 1px solid;
+    }
+
+    #aboutBox{
+        padding-right: 2rem;
+    }
+    #aboutText{
+        border-right: solid 1px;
+  padding-right: 2rem;
     }
     </style>
 </head>

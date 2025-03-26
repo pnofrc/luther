@@ -769,7 +769,7 @@ function drawVShape(destination, placeId) {
     let uy = dy / distance;
     
     // Definisci l'angolo di rotazione in radianti (ad es. 15 gradi)
-    let angle = 15 * Math.PI / 180;
+    let angle = 10 * Math.PI / 180;
     
     // Funzione helper per ruotare un vettore
     function rotateVector(x, y, theta) {

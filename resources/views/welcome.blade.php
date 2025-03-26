@@ -323,7 +323,6 @@
         padding-right: 2rem;
     }
     #aboutText{
-        border-right: solid 1px;
   padding-right: 2rem;
     }
     </style>
@@ -754,63 +753,80 @@ function dragElement(elmnt) {
 }
 
 
-        function drawVShape(destination, placeId) {
-            // Rimuovi eventuali linee esistenti per il marker corrente
-            if (lineMapping[placeId]) {
-                lineMapping[placeId].forEach(line => line.setMap(null));
-            }
-            // Crea i punti per la linea "V"
-            let mid = {
-                lat: (wittenberg.lat + destination.lat) / 2,
-                lng: (wittenberg.lng + destination.lng) / 2
-            };
-            let dx = destination.lng - wittenberg.lng;
-            let dy = destination.lat - wittenberg.lat;
-            let offsetFactor = 0.2;
-            let offset = {
-                lat: -dy * offsetFactor,
-                lng: dx * offsetFactor
-            };
-            let leftPoint = {
-                lat: mid.lat + offset.lat,
-                lng: mid.lng + offset.lng
-            };
-            let rightPoint = {
-                lat: mid.lat - offset.lat,
-                lng: mid.lng - offset.lng
-            };
-            // Crea le linee "V"
-            let lineLeft = new google.maps.Polyline({
-                path: [wittenberg, leftPoint],
-                strokeOpacity: 0,
-                icons: [{
-                    icon: {
-                        path: "M 0,-3 0,3",
-                        strokeOpacity: 1,
-                        scale: 1.5
-                    },
-                    offset: "0",
-                    repeat: "20px"
-                }],
-                map: map,
-            });
-            let lineRight = new google.maps.Polyline({
-                path: [wittenberg, rightPoint],
-                strokeOpacity: 0,
-                icons: [{
-                    icon: {
-                        path: "M 0,-3 0,3",
-                        strokeOpacity: 1,
-                        scale: 1.5
-                    },
-                    offset: "0",
-                    repeat: "20px"
-                }],
-                map: map,
-            });
-            // Memorizza le linee "V" in lineMapping
-            lineMapping[placeId] = [lineLeft, lineRight];
-        }
+function drawVShape(destination, placeId) {
+    // Rimuovi eventuali linee esistenti per il marker corrente
+    if (lineMapping[placeId]) {
+        lineMapping[placeId].forEach(line => line.setMap(null));
+    }
+    
+    // Calcola il vettore direzionale da wittenberg a destination
+    let dx = destination.lng - wittenberg.lng;
+    let dy = destination.lat - wittenberg.lat;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Calcola il vettore unitario nella direzione di destination
+    let ux = dx / distance;
+    let uy = dy / distance;
+    
+    // Definisci l'angolo di rotazione in radianti (ad es. 15 gradi)
+    let angle = 15 * Math.PI / 180;
+    
+    // Funzione helper per ruotare un vettore
+    function rotateVector(x, y, theta) {
+        return {
+            x: x * Math.cos(theta) - y * Math.sin(theta),
+            y: x * Math.sin(theta) + y * Math.cos(theta)
+        };
+    }
+    
+    // Ruota il vettore unitario di +angle e -angle per ottenere direzioni simmetriche
+    let leftRot = rotateVector(ux, uy, angle);
+    let rightRot = rotateVector(ux, uy, -angle);
+    
+    // Calcola i punti finali dei bracci, estendendoli per tutta la distanza
+    let leftPoint = {
+        lat: wittenberg.lat + leftRot.y * distance,
+        lng: wittenberg.lng + leftRot.x * distance
+    };
+    let rightPoint = {
+        lat: wittenberg.lat + rightRot.y * distance,
+        lng: wittenberg.lng + rightRot.x * distance
+    };
+    
+    // Crea le polilinee per i due bracci della "V"
+    let lineLeft = new google.maps.Polyline({
+        path: [wittenberg, leftPoint],
+        strokeOpacity: 0,
+        icons: [{
+            icon: {
+                path: "M 0,-3 0,3",
+                strokeOpacity: 1,
+                scale: 1.5
+            },
+            offset: "0",
+            repeat: "20px"
+        }],
+        map: map,
+    });
+    let lineRight = new google.maps.Polyline({
+        path: [wittenberg, rightPoint],
+        strokeOpacity: 0,
+        icons: [{
+            icon: {
+                path: "M 0,-3 0,3",
+                strokeOpacity: 1,
+                scale: 1.5
+            },
+            offset: "0",
+            repeat: "20px"
+        }],
+        map: map,
+    });
+    
+    // Memorizza le linee per eventuali aggiornamenti o rimozioni future
+    lineMapping[placeId] = [lineLeft, lineRight];
+}
+
         // Pre-renderizza gli infoBox (una volta sola) per ogni luogo, in base all'ordine dei dati
         function renderInfoBoxes() {
             let infoBoxesContainer = document.getElementById("infoBoxes");

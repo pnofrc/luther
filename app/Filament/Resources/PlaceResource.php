@@ -51,9 +51,9 @@ class PlaceResource extends Resource
                             ->label('Copia ed Incolla')
                     ->readOnly(),
 
-                    Forms\Components\Textarea::make('content_it')->label('Content (IT)')->required(),
-                    Forms\Components\Textarea::make('content_de')->label('Content (DE)')->required(),
-                    Forms\Components\Textarea::make('content_en')->label('Content (EN)')->required(),
+                    Forms\Components\MarkdownEditor::make('content_it')->label('Content (IT)')->required(),
+                    Forms\Components\MarkdownEditor::make('content_de')->label('Content (DE)')->required(),
+                    Forms\Components\MarkdownEditor::make('content_en')->label('Content (EN)')->required(),
                     Forms\Components\FileUpload::make('file')->label('Upload PDF')->multiple()->preserveFilenames()->downloadable()->reorderable()->directory('files'),
                     Forms\Components\TextInput::make('latitude')->label('Latitude')->numeric()->required(),
                     Forms\Components\TextInput::make('longitude')->label('Longitude')->numeric()->required(),

@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Luther Lexicon Map</title>
     <link rel="icon" type="image/x-icon" href="/icon-dot-black.svg">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 
     <style>
@@ -316,8 +317,8 @@
     }
 
     .nested{
-        border-bottom: 1px solid;
-    }
+        text-decoration: underline;
+        }
 
     #aboutBox{
         padding-right: 2rem;
@@ -892,11 +893,11 @@ function drawVShape(destination, placeId) {
         function getPopupContent(place) {
             if (place.title_it === "Wittenberg") {
                 if (currentLang === "IT")
-                return `<span class="title-box">${place.title_it}</span></div> <p>${place.content_it}</p>`;
+                return `<span class="title-box">${place.title_it}</span></div> <div>${marked.parse(place.content_it)}</div>`;
                 if (currentLang === "DE")
-                return `<span class="title-box">${place.title_de}</span></div> <p>${place.content_de}</p>`;
+                return `<span class="title-box">${place.title_de}</span></div> <div>${marked.parse(place.content_de)}</div>`;
                 if (currentLang === "EN")
-                return `<span class="title-box">${place.title_en}</span></div> <p>${place.content_en}</p>`;
+                return `<span class="title-box">${place.title_en}</span></div> <div>${marked.parse(place.content_en)}</div>`;
             } else {
                 
                 if (place.file) {
@@ -904,7 +905,7 @@ function drawVShape(destination, placeId) {
         return `
             <span class="title-box">${place.title_it}</span>
             <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
-            <p>${place.content_it}</p>
+            <div>${marked.parse(place.content_it)}</div>
             ${place.file.map((file, i) => `<a href="/storage/${file}" download>Download del pdf ${i + 1}</a><br>`).join('')}
         `;
     }
@@ -912,7 +913,7 @@ function drawVShape(destination, placeId) {
         return `
             <span class="title-box">${place.title_de}</span>
             <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
-            <p>${place.content_de}</p>
+            <div>${marked.parse(place.content_de)}</div>
             ${Array.isArray(place.file) ? place.file.map((file, i) => `<a href="/storage/${file}" download>PDF herunterladen ${i + 1}</a><br>`).join('') : `<a href="/storage/${place.file}" download>PDF herunterladen</a>`}
         `;
     }
@@ -920,18 +921,18 @@ function drawVShape(destination, placeId) {
         return `
             <span class="title-box">${place.title_en}</span>
             <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
-            <p>${place.content_en}</p>
+            <p>${marked.parse(place.content_en)}</p>
             ${Array.isArray(place.file) ? place.file.map((file, i) => `<a href="/storage/${file}" download>Download PDF ${i + 1}</a><br>`).join('') : `<a href="/storage/${place.file}" download>Download PDF</a>`}
         `;
     }
 
                     } else {
                         if (currentLang === "IT")
-                        return `<span class="title-box">${place.title_it}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_it}</p>`;
+                        return `<span class="title-box">${place.title_it}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <div>${marked.parse(place.content_it)}</div>`;
                         if (currentLang === "DE")
-                        return `<span class="title-box">${place.title_de}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_de}</p>`;
+                        return `<span class="title-box">${place.title_de}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <div>${marked.parse(place.content_de)}</div>`;
                         if (currentLang === "EN")
-                        return `<span class="title-box">${place.title_en}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_en}</p>`;
+                        return `<span class="title-box">${place.title_en}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <div>${marked.parse(place.content_en)}</div>`;
             
                     }
                      }

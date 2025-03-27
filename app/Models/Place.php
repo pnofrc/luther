@@ -17,6 +17,9 @@ class Place extends Model
         'latitude', 'longitude'
     ];
 
+    protected $casts = [
+        'file' => 'array',
+    ];
     public function keyword()
     {
         return $this->belongsTo(Keyword::class);

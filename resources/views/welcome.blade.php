@@ -452,14 +452,14 @@
         let map;
         let markers = {};
         let currentLang = "IT";
-        let connectionLine = null; // Per la linea tratteggiata
+        let connectionLine = null;
         let about = {!!json_encode($about -> toArray())!!}
-        let places = {!!json_encode($places -> toArray())!!}; // Dati dai backend
-        let keywords = {!!json_encode($keywords -> toArray())!!}; // Dati dai backend
-        // Imposta manualmente le coordinate di Wittenberg
+        let places = {!!json_encode($places -> toArray())!!};
+        let keywords = {!!json_encode($keywords -> toArray())!!};
+
         const wittenberg = {
-            lat: 51.90123, // Imposta la latitudine corretta
-            lng: 12.60321 // Imposta la longitudine corretta
+            lat: 51.90123, 
+            lng: 12.60321
         };
         let connectionLines = [];
         let lineMapping = {};
@@ -472,12 +472,11 @@
                         if (place.title_it !== "Wittenberg" && place.title_de !== "Wittenberg" && place
                             .title_en !==
                             "Wittenberg") {
-                            marker.setMap(null); // Rimuovi il marker dalla mappa
+                            marker.setMap(null); 
                         } else {
-                            marker.setMap(map); // Mostra il marker di Wittenberg
+                            marker.setMap(map); 
                         }
                     } else {
-                        // Mostra tutti i marker e i label
                         marker.setMap(map);
                     }
                 });
@@ -486,7 +485,7 @@
         function initMap() {
             // Inizializzazione della mappa
             map = new google.maps.Map(document.getElementById("map"), {
-                center: centerCoordinates, // Assicurati che 'centerCoordinates' sia definito
+                center: centerCoordinates,
                 zoom: 4,
                 minZoom: 4,
                 mapTypeControl: false,
@@ -900,14 +899,32 @@ function drawVShape(destination, placeId) {
                 return `<span class="title-box">${place.title_en}</span></div> <p>${place.content_en}</p>`;
             } else {
                 
-                    if(place.file){
-                        if (currentLang === "IT")
-                        return `<span class="title-box">${place.title_it}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_it}</p> <a href="/storage/${place.file}" download>Download del pdf</a>`;
-                        if (currentLang === "DE")
-                        return `<span class="title-box">${place.title_de}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_de}</p> <a href="/storage/${place.file}" download>Download the pdf</a>`;
-                        if (currentLang === "EN")
-                        return `<span class="title-box">${place.title_en}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_en}</p> <a href="/storage/${place.file}" download>PDF herunterladen</a>`;
-            
+                if (place.file) {
+    if (currentLang === "IT") {
+        return `
+            <span class="title-box">${place.title_it}</span>
+            <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
+            <p>${place.content_it}</p>
+            ${place.file.map((file, i) => `<a href="/storage/${file}" download>Download del pdf ${i + 1}</a><br>`).join('')}
+        `;
+    }
+    if (currentLang === "DE") {
+        return `
+            <span class="title-box">${place.title_de}</span>
+            <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
+            <p>${place.content_de}</p>
+            ${Array.isArray(place.file) ? place.file.map((file, i) => `<a href="/storage/${file}" download>PDF herunterladen ${i + 1}</a><br>`).join('') : `<a href="/storage/${place.file}" download>PDF herunterladen</a>`}
+        `;
+    }
+    if (currentLang === "EN") {
+        return `
+            <span class="title-box">${place.title_en}</span>
+            <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
+            <p>${place.content_en}</p>
+            ${Array.isArray(place.file) ? place.file.map((file, i) => `<a href="/storage/${file}" download>Download PDF ${i + 1}</a><br>`).join('') : `<a href="/storage/${place.file}" download>Download PDF</a>`}
+        `;
+    }
+
                     } else {
                         if (currentLang === "IT")
                         return `<span class="title-box">${place.title_it}</span> <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div> <p>${place.content_it}</p>`;

@@ -54,7 +54,7 @@ class PlaceResource extends Resource
                     Forms\Components\Textarea::make('content_it')->label('Content (IT)')->required(),
                     Forms\Components\Textarea::make('content_de')->label('Content (DE)')->required(),
                     Forms\Components\Textarea::make('content_en')->label('Content (EN)')->required(),
-                    Forms\Components\FileUpload::make('file')->label('Upload PDF')->directory('files'),
+                    Forms\Components\FileUpload::make('file')->label('Upload PDF')->multiple()->preserveFilenames()->downloadable()->reorderable()->directory('files'),
                     Forms\Components\TextInput::make('latitude')->label('Latitude')->numeric()->required(),
                     Forms\Components\TextInput::make('longitude')->label('Longitude')->numeric()->required(),
                    

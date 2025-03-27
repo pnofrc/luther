@@ -197,6 +197,7 @@
             pointer-events: all;
             max-height: 65%;
             overflow-y: scroll;
+            z-index: 10;
         }
 
         .closeBtn {
@@ -432,7 +433,7 @@
     <script src="https://unpkg.com/@googlemaps/markerwithlabel/dist/index.min.js"></script>
     <script>
  
-        let zIndexInc = 0;
+        let zIndexInc = 10;
         
         var isMobile = false; 
         if (window.innerWidth <= 960) {

@@ -113,18 +113,20 @@
 
         }
     #aboutBox{
+        z-index: 99999 !important;
     background-color: rgb(238, 235, 226);
     display:none;
     width: 70vw;
     max-width: 70vw;
     max-height: 60vh;
   overflow-y: scroll;
-  
+  align-items: self-start;
+  flex-direction: row-reverse;
     }
 
     #aboutBox span{
-        margin-top: 5vh;
-  display: block;
+        margin-top: 3vh;
+    display: block;
     }
         #lang span {
             cursor: pointer;
@@ -198,15 +200,15 @@
             max-height: 65%;
             overflow-y: scroll;
             z-index: 10;
+            align-items: self-start;
+            flex-direction: row-reverse;
         }
 
         .closeBtn {
-            position: absolute;
-            top: 3vmin;
-            right: 3vmin;
             width: 3vmin;
             cursor: pointer !important;
             z-index: 99999999999;
+            position: fixed;
         }
 
         .marker-label {
@@ -321,11 +323,13 @@
         text-decoration: underline;
         }
 
-    #aboutBox{
-        padding-right: 2rem;
-    }
+    /* #aboutBox,
     #aboutText{
-  padding-right: 2rem;
+  padding-right: 3vw;
+    } */
+
+    .contentBox{
+        width: 100%;
     }
     </style>
 </head>
@@ -689,8 +693,11 @@
                 toggleMarkersByZoom(zoomLevel); // Applica la logica per i marker in base al nuovo zoom
             });
         }
+        
      
-        let topInc = 0;
+
+
+
 
 function dragElement(elmnt) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -715,10 +722,7 @@ function dragElement(elmnt) {
         zIndexInc++;
         elmnt.style.zIndex = zIndexInc;
 
-        if (window.matchMedia("(max-width: 800px)").matches) {
-            topInc++
-            elmnt.style.top = topInc
-        }
+ 
         // e.preventDefault();
         pos3 = e.clientX;
         pos4 = e.clientY;
@@ -835,7 +839,14 @@ function drawVShape(destination, placeId) {
                 let box = document.getElementById("infoBox-" + place.id);
                 if (!box) { // Se la infoBox non esiste, creiamo una nuova box
                     box = document.createElement("div");
-                    dragElement(box)
+                    if (window.matchMedia("(min-width: 800px)").matches) {
+                        dragElement(box)
+                    } else {
+                        box.addEventListener('click', ()=> {
+                        zIndexInc++;
+                        box.style.zIndex = zIndexInc;
+                    })
+                    }
                     box.className = "infoBox";
                     box.id = "infoBox-" + place.id;
                     box.style.display = "none"; // Impostiamo che sia inizialmente nascosto
@@ -849,7 +860,7 @@ function drawVShape(destination, placeId) {
                     box.style.left = `${leftOffset}vw`;
                     // Impostiamo il contenuto per la lingua attuale
                     box.innerHTML =
-                        `<img src="/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> ${getPopupContent(place)}`;
+                        `<img src="/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> <div class="contentBox">${getPopupContent(place)}</div>`;
                     infoBoxesContainer.appendChild(box);
                 } else {
                     // Se l'infoBox esiste già, aggiorniamo solo il contenuto
@@ -862,7 +873,7 @@ function drawVShape(destination, placeId) {
         function showInfoBox(placeId) {
             let box = document.getElementById("infoBox-" + placeId);
             if (box) {
-                box.style.display = "block";
+                box.style.display = "flex";
             }
             // Mostra la linea associata a questo luogo
             if (lineMapping[placeId]) {
@@ -1134,8 +1145,13 @@ function closeAbout(){
     document.getElementById("aboutBox").style.display = 'none'
 }
 function openAbout(){
-let box = document.getElementById("aboutBox");
-    dragElement(box)
+    let box = document.getElementById("aboutBox");
+    if (window.matchMedia("(min-width: 800px)").matches) {
+            dragElement(box)
+        } 
+    zIndexInc++;
+    console.log(zIndexInc)
+    box.style.zIndex = zIndexInc;   
     let topOffset = 7;
     let leftOffset = 15;
     box.style.top = `${topOffset}vh`;
@@ -1143,7 +1159,7 @@ let box = document.getElementById("aboutBox");
     // Impostiamo il contenuto per la lingua attuale
     box.innerHTML =
         `<img src="/icon-close.svg" class="closeBtn" onclick="closeAbout()"> <span id="aboutText">${about.about_it}</span>`;
-    box.style.display ="block"
+    box.style.display ="flex"
 }
     </script>
 

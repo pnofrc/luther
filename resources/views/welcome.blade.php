@@ -204,6 +204,12 @@
             flex-direction: row-reverse;
         }
 
+        .closeContainer{
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+        }
+
         .closeBtn {
             width: 3vmin;
             cursor: pointer !important;
@@ -336,43 +342,6 @@
 
 <body>
     <div id="infoBoxes"></div>
-
-    
-    {{-- <div class="mobile">
-        <span class="padding" id="descWebsiteMobile">
-            Mappa digitale del lessico politico-religioso di Lutero in Europa
-        </span>
-        <span class="padding" id="yearMobile">16C. 1521</span>
-    </div>
-
-    <div class="mobile">
-        <div class="padding pointer places" id="titleKeywordMobile">
-            <span id="titleKeywordText">Parole Chiave</span>
-            <div id="listKeywords">
-                @foreach ($keywords as $keyword)
-                <span class="keywordItem" data-id="{{ $keyword->id }}">
-                    {{ $keyword->title_de }}
-                </span>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="padding pointer places" id="titlePlaceMobile">
-            <span id="titlePlaceText">Luoghi</span>
-            <div id="listPlaces">
-                @foreach ($places as $place)
-                <span class="placeItem" data-id="{{ $place->id }}" data-lat="{{ $place->latitude }}"
-                    data-lng="{{ $place->longitude }}">
-                    {{ $place->title_it }}
-                </span>
-                @endforeach
-            </div>
-        </div>
-        
-        <span class="padding pointer" onclick="openAbout()">
-            <span class="attribute" id="titleAbout">About</span>
-        </span>
-    </div> --}}
 
 
     <div id="header">
@@ -680,6 +649,7 @@
                         }
                     }
                     showInfoBox(place.id); // Mostra la info box
+                    
                 });
             });
             // map.fitBounds(bounds);
@@ -840,6 +810,7 @@ function drawVShape(destination, placeId) {
                 if (!box) { // Se la infoBox non esiste, creiamo una nuova box
                     box = document.createElement("div");
                     if (window.matchMedia("(min-width: 800px)").matches) {
+                    
                         dragElement(box)
                     } else {
                         box.addEventListener('click', ()=> {
@@ -860,12 +831,12 @@ function drawVShape(destination, placeId) {
                     box.style.left = `${leftOffset}vw`;
                     // Impostiamo il contenuto per la lingua attuale
                     box.innerHTML =
-                        `<img src="/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> <div class="contentBox">${getPopupContent(place)}</div>`;
+                        `<div class="closeContainer"><img src="/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"></div> <div class="contentBox">${getPopupContent(place)}</div>`;
                     infoBoxesContainer.appendChild(box);
                 } else {
                     // Se l'infoBox esiste già, aggiorniamo solo il contenuto
                     box.innerHTML =
-                        `<img src="/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"> ${getPopupContent(place)}`;
+                        `<div class="closeContainer"><img src="/icon-close.svg" class="closeBtn" onclick="closeInfoBox('${place.id}')"></div> ${getPopupContent(place)}`;
                 }
             });
         }
@@ -873,7 +844,7 @@ function drawVShape(destination, placeId) {
         function showInfoBox(placeId) {
             let box = document.getElementById("infoBox-" + placeId);
             if (box) {
-                box.style.display = "flex";
+                box.style.display = "block";
             }
             // Mostra la linea associata a questo luogo
             if (lineMapping[placeId]) {
@@ -1028,7 +999,12 @@ function drawVShape(destination, placeId) {
                
                 document.getElementById("titleKeywordText").innerText =
                     currentLang === "IT" ? "Parole Chiave" : currentLang === "DE" ? "Schlüsselwörter" : "Keywords";
-               
+
+                document.getElementById("descWebsite").innerHTML = 
+                currentLang === "IT" ? "Mappa digitale del lessico politico-religioso di Lutero in Europa" : currentLang === "DE" ? "Digitale Kartierung von Luthers religiös-politischem Wortschatz in Europa" : "Digital map of Luther's political-religious lexicon in Europe";
+
+
+
                     document.getElementById("aboutText").innerHTML =
                     currentLang === "IT" ? about.about_it : currentLang === "DE" ? about.about_de : about.about_en;
 
@@ -1158,7 +1134,7 @@ function openAbout(){
     box.style.left = `${leftOffset}vw`;
     // Impostiamo il contenuto per la lingua attuale
     box.innerHTML =
-        `<img src="/icon-close.svg" class="closeBtn" onclick="closeAbout()"> <span id="aboutText">${about.about_it}</span>`;
+        `<div class="closeContainer"><img src="/icon-close.svg" class="closeBtn" onclick="closeAbout()"></div> <span id="aboutText">${about.about_it}</span>`;
     box.style.display ="flex"
 }
     </script>

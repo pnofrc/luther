@@ -401,7 +401,7 @@
 
     <div id="map"></div>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzFoo_5mTjJGFO7RO8FzPZXKBher0uH0k&callback=initMap"
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initMap"
         async defer></script>
     <script src="https://unpkg.com/@googlemaps/markerwithlabel/dist/index.min.js"></script>
     <script>

@@ -6,8 +6,9 @@ use App\Models\About;
 use App\Models\Keyword;
 
 Route::get('/', function (Place $places, Keyword $keywords) {
-    $places = Place::with('keyword')->get();
-    $keywords = Keyword::get();
+    $places = Place::with('keyword')->orderBy('title_it', 'asc')->get();
+    $keywords = Keyword::orderBy('title_de', 'asc')->get();
     $about = About::first();
     return view('welcome', compact('places', 'keywords', 'about'));
 });
+

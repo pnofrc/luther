@@ -351,7 +351,7 @@
                 Mappa digitale del lessico politico-religioso di Lutero in Europa
             </span>
 
-            <span class="padding year">16C. 1521</span>
+            <span class="padding year">ISBN 979-12-210-9217-2</span>
 
         </div>
 
@@ -387,7 +387,7 @@
     </div>
 
     <div id="aboutBox" class="infoBox">
-
+        <span id="aboutText"></span>
     </div>
 
     
@@ -405,7 +405,7 @@
         async defer></script>
     <script src="https://unpkg.com/@googlemaps/markerwithlabel/dist/index.min.js"></script>
     <script>
- 
+
         let zIndexInc = 10;
         
         var isMobile = false; 
@@ -842,9 +842,12 @@ function drawVShape(destination, placeId) {
         }
         // Mostra l'infoBox per un luogo (non duplicandolo)
         function showInfoBox(placeId) {
+            zIndexInc++
+
             let box = document.getElementById("infoBox-" + placeId);
             if (box) {
                 box.style.display = "block";
+                box.style.zIndex = zIndexInc;
             }
             // Mostra la linea associata a questo luogo
             if (lineMapping[placeId]) {
@@ -921,7 +924,49 @@ function drawVShape(destination, placeId) {
                      }
             return "";
         }
-        // Cambia lingua e aggiorna marker, infoBox e menu
+
+        function updatePlaceList() {
+            const listPlaces = document.getElementById("listPlaces");
+            listPlaces.innerHTML = ""; // Svuota la lista
+
+            // mettere ordine alfabetico
+                const sortedPlaces = [...places].sort((a, b) => {
+                    const nameA = getLabel(a).toLowerCase();
+                    const nameB = getLabel(b).toLowerCase();
+                    return nameA.localeCompare(nameB);
+                });
+
+            sortedPlaces.forEach((place) => {
+                const placeItem = document.createElement("div");
+                placeItem.className = "placeItem";
+                placeItem.setAttribute("data-id", place.id);
+                placeItem.setAttribute("data-lat", place.latitude);
+                placeItem.setAttribute("data-lng", place.longitude);
+                placeItem.innerText = getLabel(place);
+
+                placeItem.addEventListener("click", function () {
+                    const lat = parseFloat(placeItem.getAttribute("data-lat"));
+                    const lng = parseFloat(placeItem.getAttribute("data-lng"));
+                    const id = placeItem.getAttribute("data-id");
+
+                    map.setZoom(5);
+                    map.panTo({ lat, lng });
+
+                    let destination = { lat, lng };
+                    drawVShape(destination, id);
+                    showInfoBox(id);
+
+                    zIndexInc++;
+                    placeItem.style.zIndex = zIndexInc;
+                });
+
+                listPlaces.appendChild(placeItem);
+            });
+
+
+}
+
+        
         // Cambia lingua e aggiorna marker, infoBox e menu
         function changeLang(lang) {
             var customIconDot = {
@@ -930,6 +975,8 @@ function drawVShape(destination, placeId) {
                 origin: new google.maps.Point(0, 0), // Punto di origine
                 anchor: new google.maps.Point(10, 10) // Punto di ancoraggio
             };
+
+
             if (currentLang !== lang) {
                 currentLang = lang;
                 // Rimuovi tutti i marker esistenti dalla mappa
@@ -981,6 +1028,7 @@ function drawVShape(destination, placeId) {
                                 lat: parseFloat(place.latitude),
                                 lng: parseFloat(place.longitude)
                             };
+                            map.panTo({ lat, lng });
                             drawVShape(destination, place.id); // Disegna la forma V
                         } else {
                             if (lineMapping[place.id]) {
@@ -1003,6 +1051,7 @@ function drawVShape(destination, placeId) {
                 document.getElementById("descWebsite").innerHTML = 
                 currentLang === "IT" ? "Mappa digitale del lessico politico-religioso di Lutero in Europa" : currentLang === "DE" ? "Digitale Kartierung von Luthers religiös-politischem Wortschatz in Europa" : "Digital map of Luther's political-religious lexicon in Europe";
 
+                    updatePlaceList();
 
 
                     document.getElementById("aboutText").innerHTML =
@@ -1108,7 +1157,6 @@ function setupDropdown(title, list) {
         });
     }
 }
-
 const titlePlace = document.getElementById("titlePlace");
 const listPlaces = document.getElementById("listPlaces");
 const titleKeyword = document.getElementById("titleKeyword");
@@ -1126,19 +1174,32 @@ function openAbout(){
             dragElement(box)
         } 
     zIndexInc++;
-    console.log(zIndexInc)
+
     box.style.zIndex = zIndexInc;   
     let topOffset = 7;
     let leftOffset = 15;
     box.style.top = `${topOffset}vh`;
     box.style.left = `${leftOffset}vw`;
+    if (currentLang === "IT"){
+        box.innerHTML =
+            `<div class="closeContainer"><img src="/icon-close.svg" class="closeBtn" onclick="closeAbout()"></div> <span id="aboutText">${about.about_it}</span>`;
+     }   else if (currentLang === "DE"){
+        box.innerHTML =
+                    `<div class="closeContainer"><img src="/icon-close.svg" class="closeBtn" onclick="closeAbout()"></div> <span id="aboutText">${about.about_de}</span>`;
+   }   else if (currentLang === "EN"){
+        box.innerHTML =
+                    `<div class="closeContainer"><img src="/icon-close.svg" class="closeBtn" onclick="closeAbout()"></div> <span id="aboutText">${about.about_en}</span>`;
+    }    
     // Impostiamo il contenuto per la lingua attuale
-    box.innerHTML =
-        `<div class="closeContainer"><img src="/icon-close.svg" class="closeBtn" onclick="closeAbout()"></div> <span id="aboutText">${about.about_it}</span>`;
-    box.style.display ="flex"
+      box.style.display ="flex"
 }
+
+// Expose initMap to global scope for Google Maps callback
+window.initMap = initMap;
+
     </script>
 
 </body>
 
 </html>
+

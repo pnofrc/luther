@@ -457,6 +457,75 @@
                 });
             }
 
+            function addMarkers(){
+                 var customIconDot = {
+                url: '/icon-dot-black.svg', // URL dell'immagine
+                scaledSize: new google.maps.Size(20, 20), // Dimensioni dell'icona
+                origin: new google.maps.Point(0, 0), // Punto di origine
+                anchor: new google.maps.Point(10, 10) // Punto di ancoraggio
+            };
+            let bounds = new google.maps.LatLngBounds(); // Per calcolare la bounding box
+
+                places.forEach((place) => {
+                let marker;
+                // Creazione del marker, personalizzato per Wittenberg
+                if (place.title_it === "Wittenberg" || place.title_de === "Wittenberg" || place.title_en ===
+                    "Wittenberg") {
+                    marker = new markerWithLabel.MarkerWithLabel({
+                        position: {
+                            lat: parseFloat(place.latitude),
+                            lng: parseFloat(place.longitude),
+                        },
+                        map: map,
+                        labelContent: "Wittenberg", // Etichetta
+                        labelAnchor: new google.maps.Point(-40, -40), // Posizione dell'etichetta
+                        labelClass: "marker-label", // Classe CSS per l'etichetta
+                        icon: customIconDot, // Icona personalizzata
+                    });
+                } else {
+                    marker = new markerWithLabel.MarkerWithLabel({
+                        position: {
+                            lat: parseFloat(place.latitude),
+                            lng: parseFloat(place.longitude),
+                        },
+                        map: map,
+                        labelContent: getLabel(place), // Etichetta dinamica
+                        labelAnchor: new google.maps.Point(-50, 0), // Posizione dell'etichetta
+                        labelClass: "marker-label", // Classe CSS per l'etichetta
+                        icon: {
+                            url: "", // Nessuna icona personalizzata
+                            size: new google.maps.Size(0, 0), // La dimensione è nulla
+                            anchor: new google.maps.Point(0, 0), // Ancoraggio
+                            scaledSize: new google.maps.Size(0, 0), // Nessuna scala
+                        },
+                    });
+                }
+                // Aggiungi i marker alla bounding box per il calcolo del livello di zoom
+                bounds.extend(marker.getPosition());
+                // Memorizza il marker
+                markers[place.id] = marker;
+                // Aggiungi l'evento di clic per il marker
+                marker.addListener("click", () => {
+                    if (getLabel(place) !== "Wittenberg") {
+                        let destination = {
+                            lat: parseFloat(place.latitude),
+                            lng: parseFloat(place.longitude)
+                        };
+                        drawVShape(destination, place.id); // Disegna la forma V
+
+                        map.panTo(destination);
+                    } else {
+                        if (lineMapping[place.id]) {
+                            lineMapping[place.id].forEach(line => line.setMap(
+                                null)); // Rimuovi le linee esistenti
+                            delete lineMapping[place.id]; // Elimina la mappatura delle linee
+                        }
+                    }
+                    showInfoBox(place.id); // Mostra la info box
+                    
+                });
+            });
+            }
         function initMap() {
             // Inizializzazione della mappa
             map = new google.maps.Map(document.getElementById("map"), {
@@ -587,71 +656,9 @@
             // Renderizzazione delle info box
             renderInfoBoxes();
             // Icona personalizzata per il marker (per esempio, un punto nero)
-            var customIconDot = {
-                url: 'https://lutherlexiconmap.education/wp-content/themes/lutherlexiconmap/images/icon-dot-black.svg', // URL dell'immagine
-                scaledSize: new google.maps.Size(20, 20), // Dimensioni dell'icona
-                origin: new google.maps.Point(0, 0), // Punto di origine
-                anchor: new google.maps.Point(10, 10) // Punto di ancoraggio
-            };
-            // Variabili per i marker e per la mappa
-            let bounds = new google.maps.LatLngBounds(); // Per calcolare la bounding box
-            places.forEach((place) => {
-                let marker;
-                // Creazione del marker, personalizzato per Wittenberg
-                if (place.title_it === "Wittenberg" || place.title_de === "Wittenberg" || place.title_en ===
-                    "Wittenberg") {
-                    marker = new markerWithLabel.MarkerWithLabel({
-                        position: {
-                            lat: parseFloat(place.latitude),
-                            lng: parseFloat(place.longitude),
-                        },
-                        map: map,
-                        labelContent: "Wittenberg", // Etichetta
-                        labelAnchor: new google.maps.Point(-40, -40), // Posizione dell'etichetta
-                        labelClass: "marker-label", // Classe CSS per l'etichetta
-                        icon: customIconDot, // Icona personalizzata
-                    });
-                } else {
-                    marker = new markerWithLabel.MarkerWithLabel({
-                        position: {
-                            lat: parseFloat(place.latitude),
-                            lng: parseFloat(place.longitude),
-                        },
-                        map: map,
-                        labelContent: getLabel(place), // Etichetta dinamica
-                        labelAnchor: new google.maps.Point(-50, 0), // Posizione dell'etichetta
-                        labelClass: "marker-label", // Classe CSS per l'etichetta
-                        icon: {
-                            url: "", // Nessuna icona personalizzata
-                            size: new google.maps.Size(0, 0), // La dimensione è nulla
-                            anchor: new google.maps.Point(0, 0), // Ancoraggio
-                            scaledSize: new google.maps.Size(0, 0), // Nessuna scala
-                        },
-                    });
-                }
-                // Aggiungi i marker alla bounding box per il calcolo del livello di zoom
-                bounds.extend(marker.getPosition());
-                // Memorizza il marker
-                markers[place.id] = marker;
-                // Aggiungi l'evento di clic per il marker
-                marker.addListener("click", () => {
-                    if (getLabel(place) !== "Wittenberg") {
-                        let destination = {
-                            lat: parseFloat(place.latitude),
-                            lng: parseFloat(place.longitude)
-                        };
-                        drawVShape(destination, place.id); // Disegna la forma V
-                    } else {
-                        if (lineMapping[place.id]) {
-                            lineMapping[place.id].forEach(line => line.setMap(
-                                null)); // Rimuovi le linee esistenti
-                            delete lineMapping[place.id]; // Elimina la mappatura delle linee
-                        }
-                    }
-                    showInfoBox(place.id); // Mostra la info box
-                    
-                });
-            });
+           
+           
+            addMarkers()
             // map.fitBounds(bounds);
             // Funzione per mostrare o nascondere i marker in base al livello di zoom
             
@@ -969,12 +976,7 @@ function drawVShape(destination, placeId) {
         
         // Cambia lingua e aggiorna marker, infoBox e menu
         function changeLang(lang) {
-            var customIconDot = {
-                url: '/icon-dot-black.svg', // URL dell'immagine
-                scaledSize: new google.maps.Size(20, 20), // Dimensioni dell'icona
-                origin: new google.maps.Point(0, 0), // Punto di origine
-                anchor: new google.maps.Point(10, 10) // Punto di ancoraggio
-            };
+           
 
 
             if (currentLang !== lang) {
@@ -984,63 +986,7 @@ function drawVShape(destination, placeId) {
                     markers[placeId].setMap(null); // Rimuove il marker dalla mappa
                 }
                 // Re-crea i marker per ogni luogo con la lingua selezionata
-                places.forEach((place) => {
-                    let marker;
-                    let label = getLabel(place); // Etichetta dinamica per la lingua selezionata
-                    // Creazione del marker, personalizzato per Wittenberg
-                    if (label === "Wittenberg") {
-                        marker = new markerWithLabel.MarkerWithLabel({
-                            position: {
-                                lat: parseFloat(place.latitude),
-                                lng: parseFloat(place.longitude),
-                            },
-                            map: map,
-                            labelContent: "Wittenberg", // Etichetta
-                            labelAnchor: new google.maps.Point(-40, -40), // Posizione dell'etichetta
-                            labelClass: "marker-label", // Classe CSS per l'etichetta
-                            icon: customIconDot, // Icona personalizzata
-                        });
-                    } else {
-                        marker = new markerWithLabel.MarkerWithLabel({
-                            position: {
-                                lat: parseFloat(place.latitude),
-                                lng: parseFloat(place.longitude),
-                            },
-                            map: map,
-                            labelContent: label, // Etichetta dinamica
-                            labelAnchor: new google.maps.Point(-50, 0), // Posizione dell'etichetta
-                            labelClass: "marker-label", // Classe CSS per l'etichetta
-                            icon: {
-                                url: "", // Nessuna icona personalizzata
-                                size: new google.maps.Size(0, 0), // La dimensione è nulla
-                                anchor: new google.maps.Point(0, 0), // Ancoraggio
-                                scaledSize: new google.maps.Size(0, 0), // Nessuna scala
-                            },
-                        });
-                    }
-                    // Memorizza il nuovo marker
-                    markers[place.id] = marker;
-
-                    // Aggiungi l'evento di clic per il marker
-                    marker.addListener("click", () => {
-                        if (label !== "Wittenberg") {
-                            let destination = {
-                                lat: parseFloat(place.latitude),
-                                lng: parseFloat(place.longitude)
-                            };
-                            map.panTo({ lat, lng });
-                            drawVShape(destination, place.id); // Disegna la forma V
-                        } else {
-                            if (lineMapping[place.id]) {
-                                lineMapping[place.id].forEach(line => line.setMap(
-                                null)); // Rimuovi le linee esistenti
-                                delete lineMapping[place.id]; // Elimina la mappatura delle linee
-                            }
-                        }
-                        showInfoBox(place.id); // Mostra la info box
-
-                    });
-                });
+                addMarkers()
                 // Cambia il titolo della sezione "Luoghi"
                 document.getElementById("titlePlaceText").innerText =
                     currentLang === "IT" ? "Luoghi" : currentLang === "DE" ? "Orte" : "Locations";

@@ -25,7 +25,16 @@ Route::get('/', function (Place $places, Keyword $keywords) {
     }
 
     $keywords = Keyword::orderBy('title_de', 'asc')->get();
+
+    // adding isbn pic
     $about = About::first();
+
+    $isbn = '<img id="isbn" src="isbn.png" >';
+
+    $about->about_it = $isbn.$about->about_it;
+    $about->about_de = $isbn.$about->about_de;
+    $about->about_en = $isbn.$about->about_en;
+
     return view('welcome', compact('places', 'keywords', 'about'));
 });
 

@@ -23,9 +23,9 @@ class AboutResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\RichEditor::make('about_it')->label('About (IT)')->html()->required(),
-                Forms\Components\RichEditor::make('about_de')->label('About (DE)')->html()->required(),
-                Forms\Components\RichEditor::make('about_en')->label('About (EN)')->html()->required(),
+                Forms\Components\RichEditor::make('about_it')->label('About (IT)')->required(),
+                Forms\Components\RichEditor::make('about_de')->label('About (DE)')->required(),
+                Forms\Components\RichEditor::make('about_en')->label('About (EN)')->required(),
             ]);
     }
 

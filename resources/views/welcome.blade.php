@@ -30,7 +30,7 @@
             padding: 0;
             overflow: hidden;
             font-size: 1em;
-
+            scroll-behavior: smooth;
         }
 
         *{
@@ -112,22 +112,33 @@
             width: 100%;
 
         }
-    #aboutBox{
-        z-index: 99999 !important;
-    background-color: rgb(238, 235, 226);
-    display:none;
-    width: 70vw;
-    max-width: 70vw;
-    max-height: 60vh;
-  overflow-y: scroll;
-  align-items: self-start;
-  flex-direction: row-reverse;
-    }
+        #aboutBox{
+            z-index: 99999 !important;
+            background-color: rgb(238, 235, 226);
+            display:none;
+            width: 70vw;
+            max-width: 70vw;
+            max-height: 60vh;
+            overflow-y: scroll;
+            align-items: self-start;
+            flex-direction: row-reverse;
+        }
 
-    #aboutBox span{
-        margin-top: 3vh;
-    display: block;
-    }
+        #aboutBox span{
+            margin-top: 3vh;
+            display: block;
+        }
+
+        #isbn{
+            transition: all .4s ease-in-out;
+            width: 10%;
+            
+        }
+
+        #isbn:hover{
+            width: 50%;
+        }
+
         #lang span {
             cursor: pointer;
         }
@@ -208,8 +219,9 @@
             width: 100%;
             display: flex;
             justify-content: flex-end;
-            flex-direction: column
         }
+
+
 
 
         .closeBtn {
@@ -273,27 +285,26 @@
             
             .mobile{
             display: block;
-        }
-        .left{
-            width: 100%;
-            border-bottom: 1px solid;
-            flex-direction: row-reverse;
-        }
+            }
+            .left{
+                width: 100%;
+                border-bottom: 1px solid;
+                flex-direction: row-reverse;
+            }
 
-        #descWebsite{
-            text-align: right
-        }
+            #descWebsite{
+                text-align: right
+            }
 
-        #header{
-            display: flex;
-            flex-direction: column;
-            border-left: unset;
-            border-right: unset;
-            border-top:unset;
-        }
+            #header{
+                display: flex;
+                flex-direction: column;
+                border-left: unset;
+                border-right: unset;
+                border-top:unset;
+            }
+
             #year{ display: none;}
-
-         
 
             #descWebsite{
                 width: 80%;
@@ -320,7 +331,6 @@
                 align-items: baseline;
             }
 
-
             .infoBox{
                 line-height: 5vmin;
                 font-size: 5vmin;
@@ -331,6 +341,10 @@
                 overflow-y: scroll;
                 max-height: 50vh;
             }
+
+                #isbn{
+                    width: 100%;
+                }
 
     }
 

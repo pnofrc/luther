@@ -235,6 +235,10 @@
         .marker-label {
             font-size: 1.5em;
             font-family: "Fraktur";
+            position: relative;
+            left: 0;
+            top: 0;
+            transform: translate(-50%, -50%);
         }
 
 
@@ -456,8 +460,10 @@
         let keywords = {!!json_encode($keywords -> toArray())!!};
 
         const wittenberg = {
-            lat: 51.90123, 
-            lng: 12.60321
+            lat: 51.880826, 
+            lng: 12.639761
+
+            
         };
         let connectionLines = [];
         let lineMapping = {};
@@ -482,11 +488,11 @@
 
             function addMarkers(){
                  var customIconDot = {
-                url: '/icon-dot-black.svg', // URL dell'immagine
-                scaledSize: new google.maps.Size(20, 20), // Dimensioni dell'icona
-                origin: new google.maps.Point(0, 0), // Punto di origine
-                anchor: new google.maps.Point(10, 10) // Punto di ancoraggio
-            };
+                    url: '/icon-dot-black.svg', // URL dell'immagine
+                    scaledSize: new google.maps.Size(20, 20), // Dimensioni dell'icona
+                    origin: new google.maps.Point(0, 0), // Punto di origine
+                    // anchor: new google.maps.Point(10, 10) // Punto di ancoraggio
+                };
             let bounds = new google.maps.LatLngBounds(); // Per calcolare la bounding box
 
                 places.forEach((place) => {
@@ -501,7 +507,7 @@
                         },
                         map: map,
                         labelContent: "Wittenberg", // Etichetta
-                        labelAnchor: new google.maps.Point(-40, -40), // Posizione dell'etichetta
+                        labelAnchor: new google.maps.Point(0,-38), // Posizione dell'etichetta
                         labelClass: "marker-label", // Classe CSS per l'etichetta
                         icon: customIconDot, // Icona personalizzata
                     });
@@ -513,13 +519,12 @@
                         },
                         map: map,
                         labelContent: getLabel(place), // Etichetta dinamica
-                        labelAnchor: new google.maps.Point(0, 0), // Posizione dell'etichetta
+                        labelSize: new google.maps.Size(50, 0),
+                        labelAnchor: new google.maps.Point(2, 0), // Posizione dell'etichetta
                         labelClass: "marker-label", // Classe CSS per l'etichetta
                         icon: {
                             url: "", // Nessuna icona personalizzata
-                            size: new google.maps.Size(0, 0), // La dimensione è nulla
-                            anchor: new google.maps.Point(0, 0), // Ancoraggio
-                            scaledSize: new google.maps.Size(0, 0), // Nessuna scala
+                         
                         },
                     });
                 }

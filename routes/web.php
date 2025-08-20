@@ -7,6 +7,23 @@ use App\Models\Keyword;
 
 Route::get('/', function (Place $places, Keyword $keywords) {
     $places = Place::with('keyword')->orderBy('title_it', 'asc')->get();
+
+    // naming titles files
+    foreach ($places as $place) {
+        if (isset($place->file)) {
+            $files_corrected = [];
+            foreach ($place->file as $file) {
+                $originalFile = $file;
+                $file = str_replace("_", " ", $file);
+                $file = str_replace(".pdf", "", $file);
+                $file = str_replace("files/", "", $file);
+                $files_corrected[] = ["title" => $file, "path" => $originalFile];
+            }
+            $place->file = $files_corrected;
+            // $places->save();
+        }
+    }
+
     $keywords = Keyword::orderBy('title_de', 'asc')->get();
     $about = About::first();
     return view('welcome', compact('places', 'keywords', 'about'));

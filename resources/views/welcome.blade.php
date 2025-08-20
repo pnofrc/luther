@@ -208,10 +208,13 @@
             width: 100%;
             display: flex;
             justify-content: flex-end;
+            flex-direction: column
         }
+
 
         .closeBtn {
             width: 3vmin;
+            margin-top: 2vmin;
             cursor: pointer !important;
             z-index: 99999999999;
             position: fixed;
@@ -220,9 +223,14 @@
         .marker-label {
             font-size: 1.5em;
             font-family: "Fraktur";
-
         }
 
+
+        .downloadDocuments{
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
 
         .title-box {
             margin-top: 1rem;
@@ -240,9 +248,10 @@
         }
 
         .title-box,
-        .keywords span {
+        .keywords span,
+        #documents {
             font-family: "Fraktur";
-            /* font-size: 1.4vw; */
+            /* font-size: 2vmin; */
         }
 
         .mobile{
@@ -490,7 +499,7 @@
                         },
                         map: map,
                         labelContent: getLabel(place), // Etichetta dinamica
-                        labelAnchor: new google.maps.Point(-50, 0), // Posizione dell'etichetta
+                        labelAnchor: new google.maps.Point(0, 0), // Posizione dell'etichetta
                         labelClass: "marker-label", // Classe CSS per l'etichetta
                         icon: {
                             url: "", // Nessuna icona personalizzata
@@ -894,30 +903,39 @@ function drawVShape(destination, placeId) {
             } else {
                 
                 if (place.file) {
-    if (currentLang === "IT") {
-        return `
-            <span class="title-box">${place.title_it}</span>
-            <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
-            <div>${marked.parse(place.content_it)}</div>
-            ${place.file.map((file, i) => `<a href="/storage/${file}" download>Download del pdf ${i + 1}</a><br>`).join('')}
-        `;
-    }
-    if (currentLang === "DE") {
-        return `
-            <span class="title-box">${place.title_de}</span>
-            <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
-            <div>${marked.parse(place.content_de)}</div>
-            ${Array.isArray(place.file) ? place.file.map((file, i) => `<a href="/storage/${file}" download>PDF herunterladen ${i + 1}</a><br>`).join('') : `<a href="/storage/${place.file}" download>PDF herunterladen</a>`}
-        `;
-    }
-    if (currentLang === "EN") {
-        return `
-            <span class="title-box">${place.title_en}</span>
-            <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
-            <p>${marked.parse(place.content_en)}</p>
-            ${Array.isArray(place.file) ? place.file.map((file, i) => `<a href="/storage/${file}" download>Download PDF ${i + 1}</a><br>`).join('') : `<a href="/storage/${place.file}" download>Download PDF</a>`}
-        `;
-    }
+                    if (currentLang === "IT") {
+                        return `
+                            <span class="title-box">${place.title_it}</span>
+                            <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
+                            <div>${marked.parse(place.content_it)}</div>
+                            <div class="downloadDocuments">
+                                <span id="documents">Documenti</span>
+                                ${place.file.map((file) => `<a href="/storage/${file.path}" download>${file.title}</a>`).join('')}
+                            </div>
+                        `;
+                    }
+                    if (currentLang === "DE") {
+                        return `
+                            <span class="title-box">${place.title_de}</span>
+                            <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
+                            <div>${marked.parse(place.content_de)}</div>
+                            <div class="downloadDocuments">
+                                <span id="documents">Dokumenten</span>
+                                ${place.file.map((file) => `<a href="/storage/${file.path}" download>${file.title}</a>`).join('')}
+                            </div>
+                            `;
+                    }
+                    if (currentLang === "EN") {
+                        return `
+                            <span class="title-box">${place.title_en}</span>
+                            <div class="keywords"><span>Keyword</span><p>${place.keyword.title_de}</p></div>
+                            <div>${marked.parse(place.content_en)}</div>
+                             <div class="downloadDocuments">
+                                <span id="documents">Documents</span>
+                                ${place.file.map((file) => `<a href="/storage/${file.path}" download>${file.title}</a>`).join('')}
+                            </div>
+                            `;
+                    }
 
                     } else {
                         if (currentLang === "IT")
@@ -987,7 +1005,9 @@ function drawVShape(destination, placeId) {
                 }
                 // Re-crea i marker per ogni luogo con la lingua selezionata
                 addMarkers()
-                // Cambia il titolo della sezione "Luoghi"
+                
+                // cambia dinamicamente i contenuti 
+               
                 document.getElementById("titlePlaceText").innerText =
                     currentLang === "IT" ? "Luoghi" : currentLang === "DE" ? "Orte" : "Locations";
                
